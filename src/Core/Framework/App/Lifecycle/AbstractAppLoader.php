@@ -24,6 +24,8 @@ abstract class AbstractAppLoader
 
     abstract public function getConfiguration(AppEntity $app): ?array;
 
+    abstract public function getManifest(AppEntity $app): ?Manifest;
+
     abstract public function deleteApp(string $technicalName): void;
 
     abstract public function getCmsExtensions(AppEntity $app): ?CmsExtensions;

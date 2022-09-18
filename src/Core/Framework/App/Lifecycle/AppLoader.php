@@ -95,6 +95,19 @@ class AppLoader extends AbstractAppLoader
         return $this->configReader->read($configPath);
     }
 
+    public function getManifest(AppEntity $app) : ?Manifest
+    {
+        $manifestPath = sprintf('%s/%s/manifest.xml', $this->projectDir, $app->getPath());
+        if (file_exists($manifestPath)) {
+            try {
+                return Manifest::createFromXmlFile($manifestPath);
+            } catch (XmlParsingException $e) {
+            }
+        }
+
+        return null;
+    }
+
     public function deleteApp(string $technicalName): void
     {
         $apps = $this->load();
