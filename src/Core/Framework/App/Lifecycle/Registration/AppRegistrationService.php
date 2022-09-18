@@ -7,6 +7,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use Psr\Http\Message\ResponseInterface;
 use Shopware\Core\Framework\App\AppEntity;
+use Shopware\Core\Framework\App\Exception\AppDeregistrationException;
 use Shopware\Core\Framework\App\Exception\AppRegistrationException;
 use Shopware\Core\Framework\App\Exception\AppUrlChangeDetectedException;
 use Shopware\Core\Framework\App\Hmac\Guzzle\AuthMiddleware;
@@ -77,6 +78,55 @@ class AppRegistrationService
             throw new AppRegistrationException($e->getMessage(), [], $e);
         } catch (GuzzleException $e) {
             throw new AppRegistrationException($e->getMessage(), [], $e);
+        }
+    }
+
+    public function unregisterApp(AppEntity $app, Manifest $manifest, Context $context) : void
+    {
+        if ($manifest->getSetup() === null || $manifest->getSetup()->getDeregistrationUrl() === null || $app->getAppSecret() === null) {
+            return;
+        }
+
+        try {
+            $shopId = $this->shopIdProvider->getShopId();
+
+            $appSecret  = $app->getAppSecret();
+            $payload    = [
+                'appSecret' => $appSecret,
+                'shopId'    => $shopId,
+                'shopUrl'   => $this->shopUrl,
+                'timestamp' => (string)(new \DateTime())->getTimestamp(),
+            ];
+            $signature  = $this->signPayload($payload, $appSecret);
+            $contextKey = AuthMiddleware::APP_REQUEST_CONTEXT;
+            $this->httpClient->post(
+                $manifest->getSetup()->getDeregistrationUrl(),#
+                [
+                    'headers'     => [
+                        'shopware-shop-signature' => $signature,
+                        'sw-version'              => $this->shopwareVersion,
+                    ],
+                    'json'        => $payload,
+                    "$contextKey" => $context,
+                ]
+            );
+        } catch (AppUrlChangeDetectedException $exception) {
+            throw new AppDeregistrationException(
+                'The app url changed. Please resolve how the apps should handle this change.'
+            );
+        } catch (RequestException $exception) {
+            if ($exception->hasResponse() && $exception->getResponse() !== null) {
+                $response = $exception->getResponse();
+                $data     = json_decode($response->getBody()->getContents(), true);
+
+                if (isset($data['error']) && \is_string($data['error'])) {
+                    throw new AppDeregistrationException($data['error']);
+                }
+            }
+
+            throw new AppDeregistrationException($exception->getMessage(), [], $exception);
+        } catch (GuzzleException $exception) {
+            throw new AppDeregistrationException($exception->getMessage(), [], $exception);
         }
     }
 

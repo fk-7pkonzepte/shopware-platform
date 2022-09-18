@@ -313,6 +313,10 @@ class AppLifecycle extends AbstractAppLifecycle
                 if ($config) {
                     $this->systemConfigService->deleteExtensionConfiguration($app->getName(), $config);
                 }
+
+                if (($manifest = $this->appLoader->getManifest($app)) !== null) {
+                    $this->registrationService->unregisterApp($app, $manifest, $context);
+                }
             }
 
             $this->appRepository->delete([['id' => $app->getId()]], $context);
