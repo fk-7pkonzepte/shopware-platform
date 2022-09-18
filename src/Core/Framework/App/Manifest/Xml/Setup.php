@@ -7,15 +7,9 @@ namespace Shopware\Core\Framework\App\Manifest\Xml;
  */
 class Setup extends XmlElement
 {
-    /**
-     * @var string
-     */
-    protected $registrationUrl;
-
-    /**
-     * @var string|null
-     */
-    protected $secret;
+    protected string $registrationUrl;
+    protected ?string $deregistrationUrl;
+    protected ?string $secret;
 
     private function __construct(array $data)
     {
@@ -32,6 +26,11 @@ class Setup extends XmlElement
     public function getRegistrationUrl(): string
     {
         return $this->registrationUrl;
+    }
+
+    public function getDeregistrationUrl() : ?string
+    {
+        return $this->deregistrationUrl;
     }
 
     public function getSecret(): ?string

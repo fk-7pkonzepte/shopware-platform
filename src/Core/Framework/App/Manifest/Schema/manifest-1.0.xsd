@@ -145,7 +145,14 @@
             <xs:element type="xs:anyURI" name="registrationUrl">
                 <xs:annotation>
                     <xs:documentation xml:lang="en">
-                        This url is used by a shop to register to your app.
+                        This url is used by a shop to register your app.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element type="xs:anyURI" name="deregistrationUrl" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation xml:lang="en">
+                        This url is used by a shop to deregister of your app.
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
