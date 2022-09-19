@@ -82,7 +82,7 @@ class ConfigReader extends XmlReader
                 continue;
             }
 
-            $elements[$count] = $this->elementToArray($element);
+            $elements[$count] = $this->elementToArray($element, $count);
             ++$count;
         }
 
@@ -117,15 +117,18 @@ class ConfigReader extends XmlReader
         return null;
     }
 
-    private function elementToArray(\DOMElement $element): array
+    private function elementToArray(\DOMElement $element, int $index) : array
     {
         $options = static::getAllChildren($element);
 
-        if ($element->nodeName === 'component') {
-            return $this->getElementDataForComponent($element, $options);
+        switch ($element->nodeName) {
+            case 'component':
+                return $this->getElementDataForComponent($element, $options);
+            case 'description':
+                return $this->getElementDataForDescription($element, $options, $index);
+            default:
+                return $this->getElementDataForInputField($element, $options);
         }
-
-        return $this->getElementDataForInputField($element, $options);
     }
 
     /**
@@ -138,6 +141,27 @@ class ConfigReader extends XmlReader
         ];
 
         return $this->setOptionsToElementData($options, $elementData);
+    }
+
+    /**
+     * @param array<\DOMElement> $options
+     */
+    private function getElementDataForDescription(\DOMElement $element, array $options, int $index) : array
+    {
+        $elementData = [
+            'componentName' => 'sw-system-config-description',
+            'name'          => 'description-' . $index,
+        ];
+        $elementData = $this->setOptionsToElementData($options, $elementData);
+
+        $elementData['content'] = [];
+        foreach ($options as $option) {
+            if ($option->nodeName === 'content') {
+                $elementData['content'][$this->getLocaleCodeFromElement($option)] = $option->nodeValue;
+            }
+        }
+
+        return $elementData;
     }
 
     private function getElementDataForInputField(\DOMElement $element, array $options): array
@@ -177,6 +201,7 @@ class ConfigReader extends XmlReader
 
             $elementData[$option->nodeName] = $option->nodeValue;
         }
+        file_put_contents(dirname(__DIR__, 6).'/log.txt', print_r($elementData,true),FILE_APPEND);
 
         return $elementData;
     }

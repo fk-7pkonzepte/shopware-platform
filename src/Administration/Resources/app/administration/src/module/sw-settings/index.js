@@ -1,5 +1,6 @@
 import './component/sw-settings-item';
 import './component/sw-system-config';
+import './component/sw-system-config-description';
 import './page/sw-settings-index';
 import './mixin/sw-settings-list.mixin';
 import './acl';
