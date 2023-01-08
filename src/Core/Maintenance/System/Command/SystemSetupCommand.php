@@ -49,6 +49,11 @@ class SystemSetupCommand extends Command
             ->addOption('force', 'f', InputOption::VALUE_NONE, 'Force setup and recreate everything')
             ->addOption('no-check-db-connection', null, InputOption::VALUE_NONE, 'dont check db connection')
             ->addOption('database-url', null, InputOption::VALUE_OPTIONAL, 'Database dsn', $this->getDefault('DATABASE_URL', ''))
+            ->addOption('database-user', null, InputOption::VALUE_OPTIONAL, 'Database user')
+            ->addOption('database-password', null, InputOption::VALUE_OPTIONAL, 'Database password')
+            ->addOption('database-host', null, InputOption::VALUE_OPTIONAL, 'Database host')
+            ->addOption('database-port', null, InputOption::VALUE_OPTIONAL, 'Database port')
+            ->addOption('database-name', null, InputOption::VALUE_OPTIONAL, 'Database name')
             ->addOption('database-ssl-ca', null, InputOption::VALUE_OPTIONAL, 'Database SSL CA path', $this->getDefault('DATABASE_SSL_CA', ''))
             ->addOption('database-ssl-cert', null, InputOption::VALUE_OPTIONAL, 'Database SSL Cert path', $this->getDefault('DATABASE_SSL_CERT', ''))
             ->addOption('database-ssl-key', null, InputOption::VALUE_OPTIONAL, 'Database SSL Key path', $this->getDefault('DATABASE_SSL_KEY', ''))
@@ -121,7 +126,7 @@ class SystemSetupCommand extends Command
         if (!$input->getOption('force') && file_exists($this->projectDir . '/.env')) {
             $io->comment('Instance has already been set-up. To start over, please delete your .env file.');
 
-            return 0;
+            return self::SUCCESS;
         }
 
         if (!$input->isInteractive()) {
@@ -132,7 +137,7 @@ class SystemSetupCommand extends Command
 
             $this->createEnvFile($input, $io, $env);
 
-            return 0;
+            return self::SUCCESS;
         }
 
         $io->section('Application information');
@@ -182,7 +187,7 @@ class SystemSetupCommand extends Command
 
         $this->createEnvFile($input, $io, $env);
 
-        return 0;
+        return self::SUCCESS;
     }
 
     /**
@@ -192,34 +197,39 @@ class SystemSetupCommand extends Command
     {
         $env = [];
 
-        $emptyValidation = static function (string $value): string {
-            if (trim($value) === '') {
-                throw new \RuntimeException('This value is required.');
-            }
+        if (empty($input->getOption('database-url'))) {
+            $emptyValidation = static function (string $value): string {
+                if (trim($value) === '') {
+                    throw new \RuntimeException('This value is required.');
+                }
 
-            return $value;
-        };
+                return $value;
+            };
 
-        $dbUser = $io->ask('Database user', 'app', $emptyValidation);
-        $dbPass = $io->askHidden('Database password') ?: '';
-        $dbHost = $io->ask('Database host', 'localhost', $emptyValidation);
-        $dbPort = $io->ask('Database port', '3306', $emptyValidation);
-        $dbName = $io->ask('Database name', 'shopware', $emptyValidation);
-        $dbSslCa = $io->ask('Database SSL CA Path', '');
-        $dbSslCert = $io->ask('Database SSL Cert Path', '');
-        $dbSslKey = $io->ask('Database SSL Key Path', '');
-        $dbSslDontVerify = $io->askQuestion(new ConfirmationQuestion('Skip verification of the database server\'s SSL certificate?', false));
+            $dbUser = $input->getOption('database-user') ?: $io->ask('Database user', 'app', $emptyValidation);
+            $dbPass = $input->getOption('database-password') ?: ($io->askHidden('Database password') ?: '');
+            $dbHost = $input->getOption('database-host') ?: $io->ask('Database host', 'localhost', $emptyValidation);
+            $dbPort = $input->getOption('database-port') ?: $io->ask('Database port', '3306', $emptyValidation);
+            $dbName = $input->getOption('database-name') ?: $io->ask('Database name', 'shopware', $emptyValidation);
 
-        $dsnWithoutDb = sprintf(
-            'mysql://%s:%s@%s:%d',
-            $dbUser,
-            rawurlencode($dbPass),
-            $dbHost,
-            $dbPort
-        );
-        $dsn = $dsnWithoutDb . '/' . $dbName;
-
+            $dsnWithoutDb = sprintf(
+                'mysql://%s:%s@%s:%d',
+                $dbUser,
+                rawurlencode($dbPass),
+                $dbHost,
+                $dbPort
+            );
+            $dsn = $dsnWithoutDb . '/' . $dbName;
+        } else {
+            $dns = $input->getOption('database-url');
+            $dsnWithoutDb = substr($dns, 0, strrpos($dns, '/'));
+        }
         $params = ['url' => $dsnWithoutDb, 'charset' => 'utf8mb4'];
+
+        $dbSslCa = $input->getOption('database-ssl-ca') ?: $io->ask('Database SSL CA Path', '');
+        $dbSslCert = $input->getOption('database-ssl-cert') ?: $io->ask('Database SSL Cert Path', '');
+        $dbSslKey = $input->getOption('database-ssl-key') ?: $io->ask('Database SSL Key Path', '');
+        $dbSslDontVerify = $io->askQuestion(new ConfirmationQuestion('Skip verification of the database server\'s SSL certificate?', false));
 
         if ($dbSslCa) {
             $params['driverOptions'][\PDO::MYSQL_ATTR_SSL_CA] = $dbSslCa;

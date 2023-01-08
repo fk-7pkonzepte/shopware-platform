@@ -77,6 +77,62 @@ class SystemSetupCommandTest extends TestCase
         ], $env);
     }
 
+    public function testEnvFileGenerationWithCustomDatabaseConfig(): void
+    {
+        $args = [
+            '--app-env' => 'test',
+            '--app-url' => 'https://example.com',
+            '--database-user' => 'app',
+            '--database-password' => 'app',
+            '--database-host' => 'localhost',
+            '--database-port' => '3306',
+            '--database-name' => 'shopware',
+            '--es-hosts' => 'localhost:9200',
+            '--es-enabled' => '1',
+            '--es-indexing-enabled' => '1',
+            '--es-index-prefix' => 'shopware',
+            '--http-cache-enabled' => '1',
+            '--http-cache-ttl' => '7200',
+            '--cdn-strategy' => 'id',
+            '--blue-green' => '1',
+            '--mailer-url' => 'smtp://localhost:25',
+            '--composer-home' => __DIR__,
+        ];
+
+        $tester = $this->getCommandTester();
+
+        $tester->execute($args, ['interactive' => false]);
+
+        $tester->assertCommandIsSuccessful();
+
+        static::assertFileExists(__DIR__ . '/.env');
+        static::assertFileDoesNotExist(__DIR__ . '/.env.local.php');
+
+        $envContent = file_get_contents(__DIR__ . '/.env');
+        var_dump($envContent);
+        static::assertIsString($envContent);
+        $env = (new Dotenv())->parse($envContent);
+
+        static::assertArrayHasKey('APP_SECRET', $env);
+        static::assertArrayHasKey('INSTANCE_ID', $env);
+        unset($env['APP_SECRET'], $env['INSTANCE_ID']);
+        static::assertEquals([
+             'APP_ENV' => 'test',
+             'APP_URL' => 'https://example.com',
+             'DATABASE_URL' => 'mysql://app:app@localhost:3306/shopware',
+             'OPENSEARCH_URL' => 'localhost:9200',
+             'SHOPWARE_ES_ENABLED' => '1',
+             'SHOPWARE_ES_INDEXING_ENABLED' => '1',
+             'SHOPWARE_ES_INDEX_PREFIX' => 'shopware',
+             'SHOPWARE_HTTP_CACHE_ENABLED' => '1',
+             'SHOPWARE_HTTP_DEFAULT_TTL' => '7200',
+             'SHOPWARE_CDN_STRATEGY_DEFAULT' => 'id',
+             'BLUE_GREEN_DEPLOYMENT' => '1',
+             'MAILER_URL' => 'smtp://localhost:25',
+             'COMPOSER_HOME' => __DIR__,
+         ], $env);
+    }
+
     public function testEnvFileGenerationWithDumpEnv(): void
     {
         $args = [
