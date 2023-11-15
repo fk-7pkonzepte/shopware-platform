@@ -12,6 +12,7 @@ use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Routing\Exception\LanguageNotFoundException;
 use Shopware\Core\Framework\ShopwareHttpException;
 use Symfony\Component\HttpFoundation\Response;
+use UnitEnum;
 
 #[Package('core')]
 class DataAbstractionLayerException extends HttpException
@@ -19,6 +20,8 @@ class DataAbstractionLayerException extends HttpException
     public const INVALID_FIELD_SERIALIZER_CODE = 'FRAMEWORK__INVALID_FIELD_SERIALIZER';
 
     public const INVALID_CRON_INTERVAL_CODE = 'FRAMEWORK__INVALID_CRON_INTERVAL_FORMAT';
+
+    public const INVALID_ENUM_CODE = 'FRAMEWORK__INVALID_ENUM_FORMAT';
 
     public const INVALID_DATE_INTERVAL_CODE = 'FRAMEWORK__INVALID_DATE_INTERVAL_FORMAT';
 
@@ -55,6 +58,20 @@ class DataAbstractionLayerException extends HttpException
             self::INVALID_CRON_INTERVAL_CODE,
             'Unknown or bad CronInterval format "{{ cronIntervalString }}".',
             ['cronIntervalString' => $cronIntervalString],
+        );
+    }
+
+    public static function invalidEnumFormat(string $className, mixed $value, ?\Throwable $previous = null, string $message = 'The enum value "{{ value }}" is invalid.'): self
+    {
+        if ($value instanceof UnitEnum) {
+            $value = $value::class . '::' . $value->name;
+        }
+        return new self(
+            Response::HTTP_BAD_REQUEST,
+            self::INVALID_ENUM_CODE,
+            $message,
+            ['value' => (string)$value, 'className' => $className],
+            $previous,
         );
     }
 

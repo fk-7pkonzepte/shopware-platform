@@ -13,6 +13,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Field\CartPriceField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\ChildrenAssociationField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\DateField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\DateTimeField;
+use Shopware\Core\Framework\DataAbstractionLayer\Field\EnumField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\Field;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\FkField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\Required;
@@ -223,6 +224,11 @@ EOF;
             case $field instanceof CalculatedPriceField:
                 $type = 'CalculatedPrice';
                 $uses[] = 'use ' . CalculatedPrice::class;
+
+                break;
+            case $field instanceof EnumField:
+                $type = $this->getClassTypeHint($field->getEnumClass());
+                $uses[] = $this->getUsage($field->getEnumClass());
 
                 break;
             case $field instanceof PriceDefinitionField:

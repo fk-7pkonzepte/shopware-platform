@@ -18,6 +18,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Field\CreatedAtField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\CustomFields;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\DateField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\DateTimeField;
+use Shopware\Core\Framework\DataAbstractionLayer\Field\EnumField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\Field;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\FkField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\Flag\Flag;
@@ -288,6 +289,7 @@ class EntitySchemaGenerator implements ApiDefinitionGeneratorInterface
             case $field instanceof FloatField:
                 return ['type' => 'float', 'flags' => $flags];
 
+            case $field instanceof EnumField:
             case $field instanceof StringField:
                 return ['type' => 'string', 'flags' => $flags];
 

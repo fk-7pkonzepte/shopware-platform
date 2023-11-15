@@ -87,6 +87,10 @@
             <tag name="shopware.entity.definition" entity="_test_lock_translation" />
         </service>
 
+        <service id="Shopware\Core\Framework\Test\DataAbstractionLayer\Field\TestDefinition\EnumFieldTestDefinition">
+            <tag name="shopware.entity.definition" />
+        </service>
+
         <service id="Shopware\Core\Framework\Test\DataAbstractionLayer\Field\TestDefinition\CustomFieldTestDefinition">
             <tag name="shopware.entity.definition" entity="attribute_test" />
         </service>
