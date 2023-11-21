@@ -99,6 +99,9 @@ EOL;
         if ($field instanceof AssociationField) {
             return null;
         }
+        if ($field instanceof TranslatedField) {
+            return null;
+        }
         if (!$field instanceof StorageAware) {
             return null;
         }
@@ -129,9 +132,6 @@ EOL;
                 $type = 'DATE';
 
                 break;
-
-            case $field instanceof TranslatedField:
-                return null;
 
             case $field instanceof CartPriceField:
             case $field instanceof CalculatedPriceField:
