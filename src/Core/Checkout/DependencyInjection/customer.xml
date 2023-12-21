@@ -85,15 +85,15 @@
         </service>
 
         <service id="Shopware\Core\Checkout\Customer\Password\LegacyEncoder\Md5">
-            <tag name="shopware.legacy_encoder"/>
+            <tag key="Md5" name="shopware.legacy_encoder"/>
         </service>
 
         <service id="Shopware\Core\Checkout\Customer\Password\LegacyEncoder\Sha256">
-            <tag name="shopware.legacy_encoder"/>
+            <tag key="Sha256" name="shopware.legacy_encoder"/>
         </service>
 
         <service id="Shopware\Core\Checkout\Customer\Password\LegacyPasswordVerifier">
-            <argument type="tagged" tag="shopware.legacy_encoder" />
+            <argument type="tagged_locator" tag="shopware.legacy_encoder" index-by="key" default-index-method="getEncoderName" />
         </service>
 
         <service id="Shopware\Core\Checkout\Customer\Subscriber\CustomerMetaFieldSubscriber">
