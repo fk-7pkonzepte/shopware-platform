@@ -76,6 +76,10 @@ base-uri 'self';
             <tag name="controller.argument_value_resolver" priority="1000"/>
         </service>
 
+        <service id="Shopware\Core\Framework\Routing\RequestJsonBodyResolver">
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
         <!-- Cache -->
         <service class="Cocur\Slugify\Slugify" public="false" id="slugify">
             <argument>%shopware.slug.config%</argument>

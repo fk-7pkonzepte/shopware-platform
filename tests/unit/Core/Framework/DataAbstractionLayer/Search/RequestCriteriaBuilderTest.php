@@ -805,4 +805,30 @@ class RequestCriteriaBuilderTest extends TestCase
             Context::createDefaultContext()
         );
     }
+
+    public function testCriteriaFromJsonBody(): void
+    {
+        $data = [
+            'limit' => 1000,
+            'page' => 2,
+            'term' => 'SearchTerm'
+        ];
+
+        $request = new Request(content: json_encode($data));
+        $request->headers->set('CONTENT_TYPE', 'application/json');
+        $request->setMethod(Request::METHOD_POST);
+
+        $criteria = new Criteria();
+
+        $this->requestCriteriaBuilder->handleRequest(
+            $request,
+            $criteria,
+            $this->staticDefinitionRegistry->get(ProductDefinition::class),
+            Context::createDefaultContext()
+        );
+
+        static::assertEquals($data['term'], $criteria->getTerm());
+        static::assertEquals($data['limit'], $criteria->getLimit());
+        static::assertEquals(($data['page'] - 1) * $data['limit'], $criteria->getOffset());
+    }
 }

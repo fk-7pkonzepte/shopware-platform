@@ -24,6 +24,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Query\ScoreQuery;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Sorting\CountSorting;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Sorting\FieldSorting;
 use Shopware\Core\Framework\Log\Package;
+use Shopware\Core\Framework\Routing\RequestJsonBodyResolver;
 use Symfony\Component\HttpFoundation\Request;
 
 #[Package('core')]
@@ -50,6 +51,8 @@ class RequestCriteriaBuilder
     {
         if ($request->getMethod() === Request::METHOD_GET) {
             $criteria = $this->fromArray($request->query->all(), $criteria, $definition, $context);
+        } elseif ($request->getContentTypeFormat() === 'json' && !$request->attributes->has(RequestJsonBodyResolver::class)) {
+            $criteria = $this->fromArray($request->toArray(), $criteria, $definition, $context);
         } else {
             $criteria = $this->fromArray($request->request->all(), $criteria, $definition, $context);
         }

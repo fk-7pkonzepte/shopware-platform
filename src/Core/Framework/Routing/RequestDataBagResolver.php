@@ -17,6 +17,11 @@ class RequestDataBagResolver implements ValueResolverInterface
             return;
         }
 
+        if ($request->getContentTypeFormat() === 'json' && !$request->attributes->has(RequestJsonBodyResolver::class)) {
+            yield new RequestDataBag($request->toArray());
+
+            return;
+        }
         yield new RequestDataBag($request->request->all());
     }
 }
