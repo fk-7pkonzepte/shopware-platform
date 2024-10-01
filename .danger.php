@@ -17,8 +17,10 @@ const COMPOSER_PACKAGE_EXCEPTIONS = [
     ],
     'strict' => [
         '^phpstan\/phpstan.*$' => 'Even patch updates for PHPStan may lead to a red CI pipeline, because of new static analysis errors',
+        '^friendsofphp\/php-cs-fixer$' => 'Even patch updates for PHP-CS-Fixer may lead to a red CI pipeline, because of new style issues',
         '^symplify\/phpstan-rules$'  => 'Even patch updates for PHPStan plugins may lead to a red CI pipeline, because of new static analysis errors',
         '^rector\/type-perfect$'  => 'Even patch updates for PHPStan plugins may lead to a red CI pipeline, because of new static analysis errors',
+        '^tomasvotruba\/type-coverage$'  => 'Even patch updates for PHPStan plugins may lead to a red CI pipeline, because of new static analysis errors',
         '^phpat\/phpat$'  => 'Even patch updates for PHPStan plugins may lead to a red CI pipeline, because of new static analysis errors',
         '^dompdf\/dompdf$' => 'Patch updates of dompdf have let to a lot of issues in the past, therefore it is pinned.',
         '^scssphp\/scssphp$' => 'Patch updates of scssphp might lead to UI breaks, therefore it is pinned.',
@@ -521,7 +523,7 @@ return (new Config())
         }
 
         foreach ($composerFiles as $composerFile) {
-            if ($composerFile->status === File::STATUS_REMOVED || str_contains((string)$composerFile->name, 'src/WebInstaller')) {
+            if ($composerFile->status === File::STATUS_REMOVED || str_contains((string)$composerFile->name, 'src/WebInstaller') || str_contains((string)$composerFile->name, 'src/Core/DevOps/StaticAnalyze/PHPStan')) {
                 continue;
             }
 

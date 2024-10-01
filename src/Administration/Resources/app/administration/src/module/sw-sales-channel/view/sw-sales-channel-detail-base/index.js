@@ -17,6 +17,8 @@ const { mapPropertyErrors } = Component.getComponentHelper();
 export default {
     template,
 
+    compatConfig: Shopware.compatConfig,
+
     inject: [
         'salesChannelService',
         'productExportService',
@@ -466,6 +468,15 @@ export default {
         dateFilter() {
             return Shopware.Filter.getByName('date');
         },
+
+        cliCommand() {
+            if (this.salesChannel.productExports === undefined || this.salesChannel.productExports.length === 0) {
+                return '';
+            }
+
+            // eslint-disable-next-line max-len
+            return `php bin/console product-export:generate ${this.salesChannel.productExports[0].storefrontSalesChannelId} ${this.salesChannel.productExports[0].id}`;
+        },
     },
 
     watch: {
@@ -552,7 +563,11 @@ export default {
 
         deleteSalesChannel(salesChannelId) {
             this.salesChannelRepository.delete(salesChannelId, Context.api).then(() => {
-                this.$root.$emit('sales-channel-change');
+                if (this.isCompatEnabled('INSTANCE_EVENT_EMITTER')) {
+                    this.$root.$emit('sales-channel-change');
+                } else {
+                    Shopware.Utils.EventBus.emit('sw-sales-channel-detail-base-sales-channel-change');
+                }
                 this.salesChannelFavoritesService.refresh();
             });
         },

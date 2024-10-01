@@ -7,6 +7,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\EntityDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityExtension;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Event\EntityLoadedEventFactory;
+use Shopware\Core\Framework\DataAbstractionLayer\Exception\MappingEntityClassesException;
 use Shopware\Core\Framework\DataAbstractionLayer\Read\EntityReaderInterface;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\EntityAggregatorInterface;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\EntitySearcherInterface;
@@ -31,8 +32,6 @@ trait DataAbstractionLayerFieldTestBehaviour
      */
     private array $addedExtensions = [];
 
-    abstract protected static function getContainer(): ContainerInterface;
-
     protected function tearDown(): void
     {
         $this->removeExtension(...$this->addedExtensions);
@@ -43,6 +42,8 @@ trait DataAbstractionLayerFieldTestBehaviour
         $this->addedSalesChannelDefinitions = [];
         $this->addedExtensions = [];
     }
+
+    abstract protected static function getContainer(): ContainerInterface;
 
     /**
      * @param class-string<EntityDefinition> ...$definitionClasses
@@ -198,8 +199,12 @@ trait DataAbstractionLayerFieldTestBehaviour
                 unset(
                     $this->definitions[$definition->getEntityName()],
                     $this->repositoryMap[$definition->getEntityName()],
-                    $this->entityClassMapping[$definition->getEntityClass()],
                 );
+
+                try {
+                    unset($this->entityClassMapping[$definition->getEntityClass()]);
+                } catch (MappingEntityClassesException) {
+                }
             }, $registry, $registry)();
         }
     }

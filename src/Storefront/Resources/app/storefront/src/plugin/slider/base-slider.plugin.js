@@ -158,7 +158,9 @@ export default class BaseSliderPlugin extends Plugin {
 
             this.$emitter.publish('initSlider');
 
-            this._initAccessibilityTweaks(sliderInfo, this.el);
+            if (window.Feature.isActive('ACCESSIBILITY_TWEAKS')) {
+                this._initAccessibilityTweaks(sliderInfo, this.el);
+            }
         };
 
         if (container) {
@@ -188,8 +190,19 @@ export default class BaseSliderPlugin extends Plugin {
     _initAccessibilityTweaks(sliderInfo, wrapperEl) {
         const sliderItems = sliderInfo.slideItems;
 
-        // Remove controls div container from tab index for better accessibility.
-        sliderInfo.controlsContainer.setAttribute('tabindex', '-1');
+        if (sliderInfo.controlsContainer) {
+            // Remove controls div container from tab index for better accessibility.
+            sliderInfo.controlsContainer.setAttribute('tabindex', '-1');
+        }
+
+        const wrapper = wrapperEl || this.el;
+        wrapper.scrollLeft = 0;
+
+        // Prevent native browser function to scroll items into view.
+        wrapper.addEventListener('scroll', (event) => {
+            wrapper.scrollLeft = 0;
+            event.preventDefault();
+        });
 
         for (let index = 0; index < sliderItems.length; index++) {
             const item = sliderItems.item(index);
@@ -203,15 +216,20 @@ export default class BaseSliderPlugin extends Plugin {
                 }
 
             } else {
-                // Tracking the focus within slider elements to keep them in view.
-                item.addEventListener('focusin', () => {
+                // Tracking the focus within slider elements to keep them in view when navigating via keyboard.
+                item.addEventListener('keyup', (event) => {
+                    if (event.key !== 'Tab') {
+                        return;
+                    }
+
                     const currentSliderInfo = this._slider.getInfo();
 
                     // Prevent native browser function to scroll items into view.
-                    if (wrapperEl) {
-                        wrapperEl.scrollLeft = 0;
-                    } else {
-                        this.el.scrollLeft = 0;
+                    wrapper.scrollLeft = 0;
+
+                    // Stop autoplay if an element gets focus via keyboard navigation.
+                    if (this._sliderSettings.autoplay) {
+                        this._slider.pause();
                     }
 
                     // Keep the element which has focus on first slide position.

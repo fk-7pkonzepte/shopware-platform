@@ -43,7 +43,6 @@
 
                     {% block component_account_register_personal %}
                         <fieldset class="register-personal mb-3">
-
                             {% block component_account_register_personal_legend %}
                                 <legend class="register-personal-title visually-hidden">
                                     {{ 'account.registerPersonalLegend'|trans|sw_sanitize }}
@@ -277,6 +276,7 @@
                                                 prefix: 'billingAddress',
                                                 data: data.get('billingAddress'),
                                                 showNoShippingPostfix: true,
+                                                scopeElementSelector: '.register-billing',
                                             } %}
                                         {% endblock %}
                                     </fieldset>
@@ -341,6 +341,7 @@
                                                             data: data.get('shippingAddress'),
                                                             showNoShippingPostfix: true,
                                                             disableNonShippableCountries: true,
+                                                            scopeElementSelector: '.register-shipping',
                                                         } %}
                                                     {% endblock %}
                                                 {% endblock %}

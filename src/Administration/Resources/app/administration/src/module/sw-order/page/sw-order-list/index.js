@@ -12,6 +12,8 @@ const { Criteria } = Shopware.Data;
 export default {
     template,
 
+    compatConfig: Shopware.compatConfig,
+
     inject: [
         'repositoryFactory',
         'stateStyleDataProviderService',
@@ -399,6 +401,12 @@ export default {
                 dataIndex: 'orderCustomer.lastName,orderCustomer.firstName',
                 label: 'sw-order.list.columnCustomerName',
                 allowResize: true,
+            }, {
+                property: 'orderCustomer.company',
+                dataIndex: 'orderCustomer.company',
+                label: 'sw-order.list.columnCustomerCompany',
+                allowResize: true,
+                visible: false,
             }, {
                 property: 'billingAddressId',
                 dataIndex: 'billingAddress.street',

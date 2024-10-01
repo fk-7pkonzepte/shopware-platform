@@ -1,6 +1,5 @@
 /**
  * @package content
- * @group disabledCompat
  */
 import { mount } from '@vue/test-utils';
 import 'src/module/sw-media/mixin/media-grid-listener.mixin';
@@ -60,6 +59,7 @@ async function createWrapper({ mediaAmount, folderAmount } = { mediaAmount: [5],
                 'sw-button': true,
                 'sw-media-folder-item': true,
                 'router-link': true,
+                'sw-extension-teaser-popover': true,
             },
 
             provide: {

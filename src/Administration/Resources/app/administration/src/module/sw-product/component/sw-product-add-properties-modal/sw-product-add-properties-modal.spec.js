@@ -1,6 +1,5 @@
-/*
+/**
  * @package inventory
- * @group disabledCompat
  */
 
 import { mount } from '@vue/test-utils';
@@ -40,6 +39,7 @@ async function createWrapper() {
                 'sw-field-error': await wrapTestComponent('sw-field-error'),
                 'router-link': true,
                 'sw-grid-column': true,
+                'sw-extension-teaser-popover': true,
             },
             provide: {
                 repositoryFactory: {

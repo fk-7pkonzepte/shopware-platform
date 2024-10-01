@@ -2,7 +2,6 @@ import { mount } from '@vue/test-utils';
 
 /**
  * @package buyers-experience#
- * @group disabledCompat
  */
 
 async function createWrapper() {
@@ -15,9 +14,6 @@ async function createWrapper() {
                 tablet: true,
                 desktop: true,
             },
-        },
-        provide: {
-            cmsService: {},
         },
         global: {
             stubs: {

@@ -8,6 +8,9 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
+/**
+ * @deprecated tag:v6.7.0 - reason:becomes-internal - Will be internal in v6.7.0
+ */
 trait StorefrontControllerMockTrait
 {
     public string $renderStorefrontView;
@@ -40,6 +43,12 @@ trait StorefrontControllerMockTrait
      * @var array<string, array<int, mixed>>
      */
     public array $flashBag = [];
+
+    public function reset(): void
+    {
+        $this->flashBag = [];
+        $this->redirected = [];
+    }
 
     /**
      * @param array<string, mixed> $parameters
@@ -107,11 +116,5 @@ trait StorefrontControllerMockTrait
     protected function generateUrl(string $route, array $parameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): string
     {
         return 'url:' . $route;
-    }
-
-    public function reset(): void
-    {
-        $this->flashBag = [];
-        $this->redirected = [];
     }
 }

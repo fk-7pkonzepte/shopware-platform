@@ -12,8 +12,6 @@ use Shopware\Core\Checkout\Customer\Aggregate\CustomerAddress\CustomerAddressDef
 use Shopware\Core\Checkout\Customer\Aggregate\CustomerAddress\CustomerAddressEntity;
 use Shopware\Core\Checkout\Customer\CustomerDefinition;
 use Shopware\Core\Checkout\Customer\CustomerEntity;
-use Shopware\Core\Checkout\Shipping\ShippingMethodDefinition;
-use Shopware\Core\Checkout\Shipping\ShippingMethodEntity;
 use Shopware\Core\Content\Category\CategoryCollection;
 use Shopware\Core\Content\Category\CategoryDefinition;
 use Shopware\Core\Content\Category\CategoryEntity;
@@ -54,7 +52,6 @@ use Shopware\Core\Framework\Test\TestDataCollection;
 use Shopware\Core\Framework\Util\Random;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\Currency\CurrencyDefinition;
-use Shopware\Core\System\DeliveryTime\DeliveryTimeEntity;
 use Shopware\Core\System\Locale\LocaleDefinition;
 use Shopware\Core\System\Locale\LocaleEntity;
 use Shopware\Core\System\Snippet\SnippetDefinition;
@@ -418,73 +415,6 @@ class EntityRepositoryTest extends TestCase
                     ]),
                 ),
             false,
-        ];
-    }
-
-    /**
-     * @param array<string, string> $properties
-     *
-     * @return array<string, mixed>
-     */
-    private static function product(IdsCollection $ids, string $key, array $properties): array
-    {
-        $builder = new ProductBuilder($ids, $key);
-        $builder->price(100);
-        foreach ($properties as $value => $group) {
-            $builder->property($value, $group);
-        }
-        $builder->active(false);
-
-        return $builder->build();
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private static function order(string $id): array
-    {
-        return [
-            'id' => Uuid::fromHexToBytes($id),
-            'currency_factor' => 1.0,
-            'order_date_time' => '2020-01-01 00:00:00.000000',
-            'version_id' => Uuid::fromHexToBytes(Defaults::LIVE_VERSION),
-            'price' => json_encode([
-                'netPrice' => 100,
-                'taxStatus' => 'gross',
-                'totalPrice' => 100,
-                'positionPrice' => 1,
-            ]),
-            'currency_id' => Uuid::fromHexToBytes(Defaults::CURRENCY),
-            'state_id' => Uuid::randomBytes(),
-            'language_id' => Uuid::fromHexToBytes(Defaults::LANGUAGE_SYSTEM),
-            'sales_channel_id' => Uuid::fromHexToBytes(TestDefaults::SALES_CHANNEL),
-            'billing_address_id' => Uuid::randomBytes(),
-            'billing_address_version_id' => Uuid::fromHexToBytes(Defaults::LIVE_VERSION),
-            'shipping_costs' => '{}',
-            'created_at' => (new \DateTime())->format(Defaults::STORAGE_DATE_TIME_FORMAT),
-        ];
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function transaction(string $orderId, string $payment, string $state): array
-    {
-        $machineId = $this->getContainer()->get(Connection::class)
-            ->fetchOne('SELECT id FROM state_machine WHERE technical_name = :state', ['state' => 'order_transaction.state']);
-
-        $stateId = $this->getContainer()->get(Connection::class)
-            ->fetchOne('SELECT id FROM state_machine_state WHERE technical_name = :state AND state_machine_id = :machineId', ['state' => $state, 'machineId' => $machineId]);
-
-        return [
-            'id' => Uuid::randomBytes(),
-            'version_id' => Uuid::fromHexToBytes(Defaults::LIVE_VERSION),
-            'order_version_id' => Uuid::fromHexToBytes(Defaults::LIVE_VERSION),
-            'order_id' => Uuid::fromHexToBytes($orderId),
-            'payment_method_id' => Uuid::fromHexToBytes($payment),
-            'state_id' => $stateId,
-            'amount' => json_encode(['unitPrice' => 100]),
-            'created_at' => (new \DateTime())->format(Defaults::STORAGE_DATE_TIME_FORMAT),
         ];
     }
 
@@ -1149,87 +1079,6 @@ class EntityRepositoryTest extends TestCase
         }
     }
 
-    public function testCloneWithManyToMany(): void
-    {
-        static::markTestSkipped('ManyToMany are currently intendedly not cloned - to be discussed');
-        $recordA = Uuid::randomHex();
-        $data = [
-            'id' => $recordA,
-            'bindShippingfree' => false,
-            'name' => 'test',
-            'availabilityRule' => [
-                'id' => Uuid::randomHex(),
-                'name' => 'asd',
-                'priority' => 2,
-            ],
-            'deliveryTime' => [
-                'id' => Uuid::randomHex(),
-                'name' => 'testDeliveryTime',
-                'min' => 1,
-                'max' => 90,
-                'unit' => DeliveryTimeEntity::DELIVERY_TIME_DAY,
-            ],
-            'tags' => [
-                [
-                    'name' => 'tag1',
-                ],
-                [
-                    'name' => 'tag2',
-                ],
-            ],
-        ];
-
-        $repository = $this->createRepository(ShippingMethodDefinition::class);
-        $context = Context::createDefaultContext();
-
-        $result = $repository->create([$data], $context);
-        $newId = Uuid::randomHex();
-
-        $written = $result->getEventByEntityName(ShippingMethodDefinition::ENTITY_NAME);
-        static::assertNotNull($written);
-        static::assertCount(1, $written->getIds());
-
-        $result = $repository->clone($recordA, $context, $newId);
-        static::assertInstanceOf(EntityWrittenContainerEvent::class, $result);
-
-        $written = $result->getEventByEntityName(ShippingMethodDefinition::ENTITY_NAME);
-        static::assertNotNull($written);
-        static::assertCount(1, $written->getIds());
-
-        $criteria = new Criteria([$recordA, $newId]);
-        $criteria->addAssociation('tags');
-        $entities = $repository->search($criteria, $context);
-        static::assertEquals([$recordA, $newId], $criteria->getIds());
-        static::assertEmpty($criteria->getSorting());
-        static::assertEmpty($criteria->getFilters());
-        static::assertEmpty($criteria->getPostFilters());
-        static::assertEmpty($criteria->getAggregations());
-        static::assertNull($criteria->getLimit());
-        static::assertNull($criteria->getOffset());
-        static::assertCount(1, $criteria->getAssociations());
-        static::assertNotNull($criteria->getAssociation('tags'));
-        static::assertEmpty($criteria->getAssociation('tags')->getSorting());
-        static::assertEmpty($criteria->getAssociation('tags')->getFilters());
-        static::assertEmpty($criteria->getAssociation('tags')->getPostFilters());
-        static::assertEmpty($criteria->getAssociation('tags')->getAggregations());
-        static::assertEmpty($criteria->getAssociation('tags')->getAssociations());
-        static::assertNull($criteria->getAssociation('tags')->getLimit());
-        static::assertNull($criteria->getAssociation('tags')->getOffset());
-
-        static::assertCount(2, $entities);
-        static::assertTrue($entities->has($recordA));
-        static::assertTrue($entities->has($newId));
-
-        $old = $entities->get($recordA);
-        $new = $entities->get($newId);
-
-        static::assertInstanceOf(ShippingMethodEntity::class, $old);
-        static::assertInstanceOf(ShippingMethodEntity::class, $new);
-
-        static::assertCount(2, $old->getTags());
-        static::assertCount(2, $new->getTags());
-    }
-
     public function testCloneWithChildren(): void
     {
         $id = Uuid::randomHex();
@@ -1745,6 +1594,73 @@ class EntityRepositoryTest extends TestCase
                 'author' => 'test',
             ],
         ], Context::createDefaultContext());
+    }
+
+    /**
+     * @param array<string, string> $properties
+     *
+     * @return array<string, mixed>
+     */
+    private static function product(IdsCollection $ids, string $key, array $properties): array
+    {
+        $builder = new ProductBuilder($ids, $key);
+        $builder->price(100);
+        foreach ($properties as $value => $group) {
+            $builder->property($value, $group);
+        }
+        $builder->active(false);
+
+        return $builder->build();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private static function order(string $id): array
+    {
+        return [
+            'id' => Uuid::fromHexToBytes($id),
+            'currency_factor' => 1.0,
+            'order_date_time' => '2020-01-01 00:00:00.000000',
+            'version_id' => Uuid::fromHexToBytes(Defaults::LIVE_VERSION),
+            'price' => json_encode([
+                'netPrice' => 100,
+                'taxStatus' => 'gross',
+                'totalPrice' => 100,
+                'positionPrice' => 1,
+            ]),
+            'currency_id' => Uuid::fromHexToBytes(Defaults::CURRENCY),
+            'state_id' => Uuid::randomBytes(),
+            'language_id' => Uuid::fromHexToBytes(Defaults::LANGUAGE_SYSTEM),
+            'sales_channel_id' => Uuid::fromHexToBytes(TestDefaults::SALES_CHANNEL),
+            'billing_address_id' => Uuid::randomBytes(),
+            'billing_address_version_id' => Uuid::fromHexToBytes(Defaults::LIVE_VERSION),
+            'shipping_costs' => '{}',
+            'created_at' => (new \DateTime())->format(Defaults::STORAGE_DATE_TIME_FORMAT),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function transaction(string $orderId, string $payment, string $state): array
+    {
+        $machineId = $this->getContainer()->get(Connection::class)
+            ->fetchOne('SELECT id FROM state_machine WHERE technical_name = :state', ['state' => 'order_transaction.state']);
+
+        $stateId = $this->getContainer()->get(Connection::class)
+            ->fetchOne('SELECT id FROM state_machine_state WHERE technical_name = :state AND state_machine_id = :machineId', ['state' => $state, 'machineId' => $machineId]);
+
+        return [
+            'id' => Uuid::randomBytes(),
+            'version_id' => Uuid::fromHexToBytes(Defaults::LIVE_VERSION),
+            'order_version_id' => Uuid::fromHexToBytes(Defaults::LIVE_VERSION),
+            'order_id' => Uuid::fromHexToBytes($orderId),
+            'payment_method_id' => Uuid::fromHexToBytes($payment),
+            'state_id' => $stateId,
+            'amount' => json_encode(['unitPrice' => 100]),
+            'created_at' => (new \DateTime())->format(Defaults::STORAGE_DATE_TIME_FORMAT),
+        ];
     }
 
     /**

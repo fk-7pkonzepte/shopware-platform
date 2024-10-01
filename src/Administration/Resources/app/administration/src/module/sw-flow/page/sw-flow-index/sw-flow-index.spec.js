@@ -2,7 +2,6 @@ import { mount } from '@vue/test-utils';
 
 /**
  * @package services-settings
- * @group disabledCompat
  */
 async function createWrapper(privileges = []) {
     return mount(await wrapTestComponent('sw-flow-index', {
@@ -41,6 +40,7 @@ async function createWrapper(privileges = []) {
                 'sw-tabs-item': true,
                 'sw-skeleton': true,
                 'router-view': true,
+                'sw-extension-teaser-popover': true,
             },
             provide: {
                 repositoryFactory: {

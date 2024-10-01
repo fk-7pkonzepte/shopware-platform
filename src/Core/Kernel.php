@@ -10,6 +10,7 @@ use Shopware\Core\Framework\Api\Controller\FallbackController;
 use Shopware\Core\Framework\Feature;
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Plugin\KernelPluginLoader\KernelPluginLoader;
+use Shopware\Core\Framework\Util\Hasher;
 use Shopware\Core\Framework\Util\VersionParser;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Config\ConfigCache;
@@ -98,6 +99,11 @@ class Kernel extends HttpKernel
 
                 yield $bundle;
             }
+        }
+
+        if ((!Feature::has('v6.7.0.0') || !Feature::isActive('v6.7.0.0')) && !isset($bundles[Service\Service::class])) {
+            Feature::triggerDeprecationOrThrow('v6.7.0.0', 'The %s bundle should be added to config/bundles.php');
+            yield new Service\Service();
         }
 
         yield from $this->pluginLoader->getBundles($this->getKernelParameters(), $instanciatedBundleNames);
@@ -313,13 +319,11 @@ class Kernel extends HttpKernel
             $plugins[$plugin['name']] = $plugin['version'];
         }
 
-        $pluginHash = md5((string) json_encode($plugins, \JSON_THROW_ON_ERROR));
-
-        return md5((string) \json_encode([
+        return Hasher::hash([
             $this->cacheId,
-            substr((string) $this->shopwareVersionRevision, 0, 8),
-            substr($pluginHash, 0, 8),
-        ], \JSON_THROW_ON_ERROR));
+            (string) $this->shopwareVersionRevision,
+            $plugins,
+        ]);
     }
 
     protected function initializeDatabaseConnectionVariables(): void

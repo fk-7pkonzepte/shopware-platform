@@ -26,6 +26,9 @@ use Shopware\Core\System\CustomField\CustomFieldTypes;
 use Shopware\Core\Test\TestDefaults;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 
+/**
+ * @deprecated tag:v6.7.0 - reason:becomes-internal - Will be internal in v6.7.0
+ */
 #[Package('services-settings')]
 trait OrderActionTrait
 {
@@ -287,7 +290,7 @@ trait OrderActionTrait
             ],
             'customFieldSet' => [
                 'id' => $customFieldSetId,
-                'name' => 'Custom Field Set',
+                'name' => 'Custom_Field_Set',
                 'relations' => [[
                     'id' => Uuid::randomHex(),
                     'customFieldSetId' => $customFieldSetId,

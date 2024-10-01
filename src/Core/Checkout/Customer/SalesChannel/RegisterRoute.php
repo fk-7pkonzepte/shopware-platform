@@ -29,6 +29,7 @@ use Shopware\Core\Framework\Event\DataMappingEvent;
 use Shopware\Core\Framework\Feature;
 use Shopware\Core\Framework\Log\Package;
 use Shopware\Core\Framework\Plugin\Exception\DecorationPatternException;
+use Shopware\Core\Framework\Util\Hasher;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\Framework\Validation\BuildValidationEvent;
 use Shopware\Core\Framework\Validation\DataBag\DataBag;
@@ -351,8 +352,10 @@ class RegisterRoute extends AbstractRegisterRoute
         }
 
         if ($accountType === CustomerEntity::ACCOUNT_TYPE_BUSINESS) {
-            $countryId = $billingAddress instanceof DataBag ? $billingAddress->get('countryId') :
-                ($shippingAddress instanceof DataBag ? $shippingAddress->get('countryId') : null);
+            $countryId = $shippingAddress instanceof DataBag
+                ? $shippingAddress->get('countryId')
+                : ($billingAddress instanceof DataBag ? $billingAddress->get('countryId') : null);
+
             if ($countryId) {
                 if ($this->requiredVatIdField($countryId, $context)) {
                     $definition->add('vatIds', new NotBlank());
@@ -593,7 +596,7 @@ class RegisterRoute extends AbstractRegisterRoute
             $urlTemplate = '/registration/confirm?em=%%HASHEDEMAIL%%&hash=%%SUBSCRIBEHASH%%';
         }
 
-        $emailHash = hash('sha1', $customer->getEmail());
+        $emailHash = Hasher::hash($customer->getEmail(), 'sha1');
 
         $urlEvent = new CustomerConfirmRegisterUrlEvent($context, $urlTemplate, $emailHash, $customer->getHash(), $customer);
         $this->eventDispatcher->dispatch($urlEvent);

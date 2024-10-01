@@ -11,6 +11,8 @@ const { Criteria } = Shopware.Data;
 export default {
     template,
 
+    compatConfig: Shopware.compatConfig,
+
     inject: [
         'repositoryFactory',
         'exportTemplateService',
@@ -210,14 +212,17 @@ export default {
             criteria.getAssociation('currencies')
                 .addSorting(Criteria.sort('name', 'ASC'));
             criteria.addAssociation('domains');
-            criteria.addAssociation('languages');
+            criteria.getAssociation('languages')
+                .addSorting(Criteria.sort('name', 'ASC'));
             criteria.addAssociation('analytics');
 
             criteria.addAssociation('productExports');
             criteria.addAssociation('productExports.salesChannelDomain.salesChannel');
 
-            criteria.addAssociation('domains.language');
-            criteria.addAssociation('domains.snippetSet');
+            criteria.getAssociation('domains.language')
+                .addSorting(Criteria.sort('name', 'ASC'));
+            criteria.getAssociation('domains.snippetSet')
+                .addSorting(Criteria.sort('name', 'ASC'));
             criteria.addAssociation('domains.currency');
             criteria.addAssociation('domains.productExports');
 
@@ -318,7 +323,11 @@ export default {
                 this.isLoading = false;
                 this.isSaveSuccessful = true;
 
-                this.$root.$emit('sales-channel-change');
+                if (this.isCompatEnabled('INSTANCE_EVENT_EMITTER')) {
+                    this.$root.$emit('sales-channel-change');
+                } else {
+                    Shopware.Utils.EventBus.emit('sw-sales-channel-detail-sales-channel-change');
+                }
                 this.loadEntityData();
             } catch (error) {
                 this.isLoading = false;

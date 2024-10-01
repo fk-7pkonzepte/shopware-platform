@@ -1,6 +1,3 @@
-/**
- * @group disabledCompat
- */
 import { mount } from '@vue/test-utils';
 
 async function createWrapper(propsData = {}, provide = {}) {
@@ -35,6 +32,7 @@ async function createWrapper(propsData = {}, provide = {}) {
                 'sw-meteor-card': {
                     template: '<div><slot></slot></div>',
                 },
+                'router-link': true,
             },
         },
         props: {

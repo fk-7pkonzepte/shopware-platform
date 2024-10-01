@@ -46,6 +46,8 @@ async function createWrapper() {
                 'sw-sales-channel-detail-domains': true,
                 'sw-category-tree-field': true,
                 'mt-select': true,
+                'sw-alert': true,
+                'sw-custom-field-set-renderer': true,
             },
             provide: {
                 salesChannelService: {},
@@ -1124,5 +1126,35 @@ describe('src/module/sw-sales-channel/view/sw-sales-channel-detail-base', () => 
 
         expect(wrapper.vm.disableGenerateByCronjob).toBe(false);
         expect(wrapper.vm.productExport.generateByCronjob).toBe(true);
+    });
+
+    it('cliCommand is empty when export missing', async () => {
+        const wrapper = await createWrapper();
+
+        await wrapper.setProps({
+            salesChannel: {
+                typeId: PRODUCT_COMPARISON_TYPE_ID,
+            },
+        });
+
+        expect(wrapper.vm.cliCommand).toBe('');
+    });
+
+    it('cliCommand is correct when export there', async () => {
+        const wrapper = await createWrapper();
+
+        await wrapper.setProps({
+            salesChannel: {
+                typeId: PRODUCT_COMPARISON_TYPE_ID,
+                productExports: [
+                    {
+                        id: 'export-id',
+                        storefrontSalesChannelId: 'sc-id',
+                    },
+                ],
+            },
+        });
+
+        expect(wrapper.vm.cliCommand).toBe('php bin/console product-export:generate sc-id export-id');
     });
 });

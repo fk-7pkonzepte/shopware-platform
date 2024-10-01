@@ -4,7 +4,6 @@ import { createRouter, createWebHistory } from 'vue-router';
 
 /**
  * @package services-settings
- * @group disabledCompat
  */
 
 const { EntityCollection, Criteria } = Shopware.Data;
@@ -261,6 +260,7 @@ async function createWrapper(props = defaultProps, provide = {}) {
                     'sw-settings-rule-assignment-listing': true,
                     'sw-empty-state': true,
                     'sw-settings-rule-add-assignment-modal': true,
+                    'sw-extension-teaser-popover': true,
                 },
                 provide: {
                     ruleConditionDataProviderService: ruleConditionDataProviderServiceMock,

@@ -16,13 +16,32 @@ export default {
 
     compatConfig: Shopware.compatConfig,
 
-    inject: [
-        'acl',
-        'repositoryFactory',
-        'stateMachineService',
-        'orderStateMachineService',
-        'stateStyleDataProviderService',
-    ],
+    inject: {
+        swOrderDetailOnSaveEdits: {
+            from: 'swOrderDetailOnSaveEdits',
+            default: null,
+        },
+        acl: {
+            from: 'acl',
+            default: null,
+        },
+        repositoryFactory: {
+            from: 'repositoryFactory',
+            default: null,
+        },
+        stateMachineService: {
+            from: 'stateMachineService',
+            default: null,
+        },
+        orderStateMachineService: {
+            from: 'orderStateMachineService',
+            default: null,
+        },
+        stateStyleDataProviderService: {
+            from: 'stateStyleDataProviderService',
+            default: null,
+        },
+    },
 
     emits: ['save-edits'],
 
@@ -394,7 +413,11 @@ export default {
 
             this.getTransitionOptions()
                 .then(() => {
-                    this.$emit('save-edits');
+                    if (this.swOrderDetailOnSaveEdits) {
+                        this.swOrderDetailOnSaveEdits();
+                    } else {
+                        this.$emit('save-edits');
+                    }
                 })
                 .catch((error) => {
                     this.createNotificationError(error);

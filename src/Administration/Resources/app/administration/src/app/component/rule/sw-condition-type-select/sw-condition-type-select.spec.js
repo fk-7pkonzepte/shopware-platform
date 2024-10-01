@@ -1,6 +1,3 @@
-/**
- * @group disabledCompat
- */
 import { mount } from '@vue/test-utils';
 
 async function createWrapper(customProps = {}, customOptions = {}) {
@@ -30,10 +27,10 @@ async function createWrapper(customProps = {}, customOptions = {}) {
                 'sw-select-result-list': true,
             },
             provide: {
-                removeNodeFromTree: () => {
-                },
+                removeNodeFromTree: () => {},
                 conditionDataProviderService: {},
                 restrictedConditions: {},
+                childAssociationField: 'children',
             },
             ...customOptions,
         },
@@ -63,8 +60,7 @@ describe('src/app/component/rule/sw-condition-type-select', () => {
     it('should have the right tooltip according to the restriction', async () => {
         const wrapper = await createWrapper({}, {
             provide: {
-                removeNodeFromTree: () => {
-                },
+                removeNodeFromTree: () => {},
                 conditionDataProviderService: {},
                 restrictedConditions: {
                     customerBillingCountry: [
@@ -74,6 +70,7 @@ describe('src/app/component/rule/sw-condition-type-select', () => {
                         },
                     ],
                 },
+                childAssociationField: 'children',
             },
         });
 
@@ -102,13 +99,11 @@ describe('src/app/component/rule/sw-condition-type-select', () => {
                 removeNodeFromTree: jest.fn(),
                 conditionDataProviderService: {},
                 restrictedConditions: {},
+                childAssociationField: 'promotionAssociation',
             },
         });
 
-        // mocking childAssociationField
-        wrapper.vm.childAssociationField = 'promotionAssociation';
-
-        await wrapper.vm.changeType('customer');
+        wrapper.vm.changeType('customer');
 
         expect(wrapper.vm.removeNodeFromTree).toHaveBeenCalledTimes(1);
     });
@@ -116,8 +111,7 @@ describe('src/app/component/rule/sw-condition-type-select', () => {
     it('should get groupAssignments with flow triggers', async () => {
         const wrapper = await createWrapper({}, {
             provide: {
-                removeNodeFromTree: () => {
-                },
+                removeNodeFromTree: () => {},
                 conditionDataProviderService: {},
                 restrictedConditions: {
                     someRestriction: [
@@ -126,6 +120,7 @@ describe('src/app/component/rule/sw-condition-type-select', () => {
                         },
                     ],
                 },
+                childAssociationField: 'children',
             },
         });
 
@@ -137,8 +132,7 @@ describe('src/app/component/rule/sw-condition-type-select', () => {
     it('should get groupAssignments with promotions', async () => {
         const wrapper = await createWrapper({}, {
             provide: {
-                removeNodeFromTree: () => {
-                },
+                removeNodeFromTree: () => {},
                 conditionDataProviderService: {},
                 restrictedConditions: {
                     someRestriction: [
@@ -156,6 +150,7 @@ describe('src/app/component/rule/sw-condition-type-select', () => {
                         },
                     ],
                 },
+                childAssociationField: 'children',
             },
         });
 

@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils';
 
 /**
- * @package customer-order
+ * @package checkout
  */
 
 async function createWrapper(order = {}) {
@@ -59,6 +59,10 @@ async function createWrapper(order = {}) {
                 'sw-tabs': true,
                 'sw-tabs-item': true,
                 'sw-icon': true,
+                'sw-language-switch': true,
+                'sw-order-leave-page-modal': true,
+                'sw-extension-component-section': true,
+                'router-link': true,
             },
             provide: {
                 repositoryFactory: {
@@ -234,11 +238,24 @@ describe('src/module/sw-order/page/sw-order-detail', () => {
         };
 
 
+        const deliveryDiscount = {
+            id: 'deliveryId2',
+        };
+
+        const deliveries = [
+            {
+                id: 'deliveryId',
+            },
+            deliveryDiscount,
+        ];
+
+
         wrapper = await createWrapper({
             lineItems: [
                 lineItemWithExistingProduct,
                 promotionLineItem,
             ],
+            deliveries,
         });
 
         wrapper.vm.orderService.recalculateOrder = jest.fn(() => Promise.resolve());
@@ -247,7 +264,9 @@ describe('src/module/sw-order/page/sw-order-detail', () => {
         await flushPromises();
 
         expect(wrapper.vm.automaticPromotions).toHaveLength(1);
+        expect(wrapper.vm.deliveryDiscounts).toHaveLength(1);
         expect(wrapper.vm.automaticPromotions).toContainEqual(promotionLineItem);
+        expect(wrapper.vm.deliveryDiscounts).toContainEqual(deliveryDiscount);
 
         await wrapper.vm.onSaveAndRecalculate();
         expect(wrapper.vm.orderService.recalculateOrder).toHaveBeenCalled();
@@ -270,11 +289,23 @@ describe('src/module/sw-order/page/sw-order-detail', () => {
         };
 
 
+        const deliveryDiscount = {
+            id: 'deliveryId2',
+        };
+
+        const deliveries = [
+            {
+                id: 'deliveryId',
+            },
+            deliveryDiscount,
+        ];
+
         wrapper = await createWrapper({
             lineItems: [
                 lineItemWithExistingProduct,
                 promotionLineItem,
             ],
+            deliveries,
         });
 
         wrapper.vm.orderService.recalculateOrder = jest.fn(() => Promise.resolve());
@@ -283,11 +314,14 @@ describe('src/module/sw-order/page/sw-order-detail', () => {
         await flushPromises();
 
         expect(wrapper.vm.automaticPromotions).toHaveLength(1);
+        expect(wrapper.vm.deliveryDiscounts).toHaveLength(1);
         expect(wrapper.vm.automaticPromotions).toContainEqual(promotionLineItem);
+        expect(wrapper.vm.deliveryDiscounts).toContainEqual(deliveryDiscount);
 
         await wrapper.vm.onRecalculateAndReload();
 
         expect(wrapper.vm.promotionsToDelete).toHaveLength(1);
+        expect(wrapper.vm.deliveryDiscountsToDelete).toHaveLength(1);
         expect(wrapper.vm.orderService.recalculateOrder).toHaveBeenCalled();
         expect(wrapper.vm.orderService.toggleAutomaticPromotions).toHaveBeenCalled();
     });
@@ -309,21 +343,36 @@ describe('src/module/sw-order/page/sw-order-detail', () => {
         };
 
 
+        const deliveryDiscount = {
+            id: 'deliveryId2',
+        };
+
+        const deliveries = [
+            {
+                id: 'deliveryId',
+            },
+            deliveryDiscount,
+        ];
+
         wrapper = await createWrapper({
             lineItems: [
                 lineItemWithExistingProduct,
                 promotionLineItem,
             ],
+            deliveries,
         });
 
         await flushPromises();
 
         wrapper.vm.promotionsToDelete = ['promotionLineItemId'];
+        wrapper.vm.deliveryDiscountsToDelete = ['deliveryId2'];
 
         await wrapper.vm.onSaveEdits();
 
         expect(wrapper.vm.order.lineItems).toHaveLength(1);
+        expect(wrapper.vm.order.deliveries).toHaveLength(1);
         expect(wrapper.vm.promotionsToDelete).toHaveLength(0);
+        expect(wrapper.vm.deliveryDiscountsToDelete).toHaveLength(0);
     });
 
     it('should handle order address update', async () => {

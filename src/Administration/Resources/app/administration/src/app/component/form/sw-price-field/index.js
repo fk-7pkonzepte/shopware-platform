@@ -160,6 +160,21 @@ Component.register('sw-price-field', {
         };
     },
 
+    setup() {
+        const onPriceGrossChangeDebounce = debounce(function onPriceGrossChangeDebounce() {
+            this.onPriceGrossChange(this.priceForCurrency.gross);
+        }, 300);
+
+        const onPriceNetChangeDebounce = debounce(function onPriceNetChangeDebounce() {
+            this.onPriceNetChange(this.priceForCurrency.net);
+        }, 300);
+
+        return {
+            onPriceGrossChangeDebounce,
+            onPriceNetChangeDebounce,
+        };
+    },
+
     computed: {
         calculatePriceApiService() {
             return Application.getContainer('factory').apiService.getByName('calculate-price');
@@ -285,25 +300,26 @@ Component.register('sw-price-field', {
             this.$emit('change', this.priceForCurrency);
         },
 
+        onEndsWithDecimalSeparator(value) {
+            if (value) {
+                this.onPriceGrossChangeDebounce.cancel();
+                this.onPriceNetChangeDebounce.cancel();
+            }
+        },
+
         onPriceGrossInputChange(value) {
             if (this.priceForCurrency.linked) {
-                this.onPriceGrossChangeDebounce(value);
+                this.priceForCurrency.gross = value;
+                this.onPriceGrossChangeDebounce();
             }
         },
 
         onPriceNetInputChange(value) {
             if (this.priceForCurrency.linked) {
-                this.onPriceNetChangeDebounce(value);
+                this.priceForCurrency.net = value;
+                this.onPriceNetChangeDebounce();
             }
         },
-
-        onPriceGrossChangeDebounce: debounce(function onPriceGrossChangeDebounce() {
-            this.onPriceGrossChange(this.priceForCurrency.gross);
-        }, 300),
-
-        onPriceNetChangeDebounce: debounce(function onPriceNetChangeDebounce() {
-            this.onPriceNetChange(this.priceForCurrency.net);
-        }, 300),
 
         onPriceGrossChange(value) {
             if (this.priceForCurrency.linked) {

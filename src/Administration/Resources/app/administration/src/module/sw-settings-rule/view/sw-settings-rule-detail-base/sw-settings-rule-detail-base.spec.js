@@ -4,7 +4,6 @@ import RuleConditionService from 'src/app/service/rule-condition.service';
 
 /**
  * @package services-settings
- * @group disabledCompat
  */
 
 const swConditionTree = {
@@ -62,6 +61,7 @@ async function createWrapper(props = defaultProps, privileges = ['rule.editor'])
                 'sw-field-error': true,
                 'sw-label': true,
                 'sw-button': true,
+                'sw-extension-teaser-popover': true,
             },
             provide: {
                 ruleConditionDataProviderService: new RuleConditionService(),

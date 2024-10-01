@@ -1,6 +1,5 @@
-/*
+/**
  * @package inventory
- * @group disabledCompat
  */
 
 import { mount } from '@vue/test-utils';
@@ -58,6 +57,7 @@ async function createWrapper() {
                 'sw-select-field': true,
                 'router-link': true,
                 'sw-skeleton': true,
+                'sw-extension-teaser-popover': true,
             },
             mocks: {
                 $route: {

@@ -41,7 +41,15 @@ Component.register('sw-property-search', {
                 return [];
             },
         },
+        /**
+         * @deprecated tag:v6.7.0 - disabled will be removed. Use `isAddOnly` instead.
+         */
         disabled: {
+            type: Boolean,
+            required: false,
+            default: false,
+        },
+        isAddOnly: {
             type: Boolean,
             required: false,
             default: false,
@@ -61,6 +69,7 @@ Component.register('sw-property-search', {
             optionPage: 1,
             groupTotal: 1,
             optionTotal: 1,
+            prevSearchTerm: '',
         };
     },
 
@@ -82,32 +91,42 @@ Component.register('sw-property-search', {
         },
 
         propertyGroupOptionRepository() {
-            const entity = this.currentGroup ? this.currentGroup.options.entity : 'property_group_option';
-            const source = this.currentGroup ? this.currentGroup.options.source : undefined;
-
-            return this.repositoryFactory.create(entity, source);
+            return this.repositoryFactory.create('property_group_option');
         },
 
         propertyGroupOptionCriteria() {
             const criteria = new Criteria(this.optionPage, 10);
 
-            this.searchTerm.trim().split(' ').forEach((option) => {
-                if (option.trim().length === 0) {
-                    return;
-                }
+            if (this.currentGroup) {
+                criteria.addFilter(Criteria.equals('groupId', this.currentGroup.id));
+            }
 
-                criteria.addQuery(Criteria.contains('name', option.trim()), 1000);
-                criteria.addQuery(Criteria.contains('group.name', option.trim()), 800);
-            });
+            if (this.searchTerm.length > 0) {
+                this.searchTerm.trim().split(' ').forEach((option) => {
+                    if (option.trim().length === 0) {
+                        return;
+                    }
 
-            criteria.setTotalCountMode(1);
-            criteria.addAssociation('group');
+                    criteria.addQuery(Criteria.contains('name', option.trim()), 1000);
+                    criteria.addQuery(Criteria.contains('group.name', option.trim()), 800);
+                });
+
+                criteria.addAssociation('group');
+            } else {
+                criteria.addSorting(Criteria.sort('name', 'ASC'));
+            }
 
             return criteria;
         },
 
         assetFilter() {
             return Shopware.Filter.getByName('asset');
+        },
+    },
+
+    watch: {
+        isAddOnly() {
+            this.addOptionCount();
         },
     },
 
@@ -191,9 +210,11 @@ Component.register('sw-property-search', {
         onSearchOptions: utils.debounce(function debouncedSearch(input) {
             const validInput = input || '';
 
-            this.optionPage = 1;
-            this.searchTerm = validInput;
-            this.onFocusSearch();
+            if (this.prevSearchTerm !== validInput) {
+                this.prevSearchTerm = validInput;
+                this.optionPage = 1;
+                this.onFocusSearch();
+            }
         }, 400),
 
         closeOnClickOutside(event) {
@@ -225,17 +246,19 @@ Component.register('sw-property-search', {
 
         showSearch() {
             this.currentGroup = null;
-            this.displaySearch = true;
-            this.displayTree = false;
 
             this.propertyGroupOptionRepository.search(this.propertyGroupOptionCriteria, Shopware.Context.api)
                 .then((groupOptions) => {
                     this.groupOptions = groupOptions;
                     this.optionTotal = groupOptions.total;
+                    this.displaySearch = true;
+                    this.displayTree = false;
                 }).then(() => {
                     if (this.$refs.optionSearchGrid) {
                         this.selectOptions(this.$refs.optionSearchGrid);
                     }
+                }).catch((error) => {
+                    this.createNotificationError({ message: error.message });
                 });
         },
 
@@ -257,18 +280,14 @@ Component.register('sw-property-search', {
         },
 
         loadOptions() {
-            const criteria = new Criteria(1, null);
-
-            criteria.setTotalCountMode(1);
-            criteria.addAssociation('group');
-
-            this.propertyGroupOptionRepository.search(criteria, Shopware.Context.api)
+            this.propertyGroupOptionRepository.search(this.propertyGroupOptionCriteria, Shopware.Context.api)
                 .then((groupOptions) => {
-                    this.groupOptions = this.sortOptions(groupOptions);
+                    this.groupOptions = groupOptions;
                     this.optionTotal = groupOptions.total;
                     this.selectOptions(this.$refs.optionGrid);
                 });
         },
+
 
         sortOptions(options) {
             if (options.length > 0 && options[0].group.sortingType === 'alphanumeric') {

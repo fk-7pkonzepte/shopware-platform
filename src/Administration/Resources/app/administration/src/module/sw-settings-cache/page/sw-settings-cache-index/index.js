@@ -64,7 +64,7 @@ export default {
                     'product.many-to-many-id-field',
                     'product.category-denormalizer',
                     'product.cheapest-price',
-                    'product.rating-averaget',
+                    'product.rating-average',
                     'product.stream',
                     'product.search-keyword',
                     'product.seo-url',
@@ -152,6 +152,29 @@ export default {
             setTimeout(() => {
                 Shopware.State.commit('notification/setWorkerProcessPollInterval', POLL_BACKGROUND_INTERVAL);
             }, 60000);
+        },
+
+        clearDataCache() {
+            this.createNotificationInfo({
+                message: this.$tc('sw-settings-cache.notifications.clearDataCache.started'),
+            });
+
+            this.processes.normalClearCache = true;
+            this.cacheApiService.delayed().then(() => {
+                this.processSuccess.normalClearCache = true;
+
+                this.createNotificationSuccess({
+                    message: this.$tc('sw-settings-cache.notifications.clearDataCache.success'),
+                });
+            }).catch(() => {
+                this.processSuccess.normalClearCache = false;
+
+                this.createNotificationError({
+                    message: this.$tc('sw-settings-cache.notifications.clearDataCache.error'),
+                });
+            }).finally(() => {
+                this.processes.normalClearCache = false;
+            });
         },
 
         clearCache() {

@@ -173,12 +173,17 @@ async function createWrapper(privileges = []) {
                     template: '<div><slot></slot></div>',
                 },
                 'sw-sidebar-item': {
-                    template: '<div @click="$emit(\'click\')"><slot></slot></div>',
+                    template: '<div><slot></slot></div>',
                 },
                 'sw-sidebar-media-item': {
                     template: '<div><slot name="context-menu-items"></slot></div>',
                 },
                 'sw-skeleton': true,
+                'sw-language-switch': true,
+                'sw-media-preview': true,
+                'router-link': true,
+                'sw-checkbox-field': true,
+                'sw-context-button': true,
             },
         },
     });
@@ -300,7 +305,7 @@ describe('modules/sw-mail-template/page/sw-mail-template-detail', () => {
                 attribute: 'show-selection',
                 expect: undefined,
             },
-        ].forEach(element => {
+        ].forEach((element) => {
             if (!Array.isArray(element.selector.wrappers)) {
                 element.selector = { wrappers: [element.selector] };
             }
@@ -408,6 +413,8 @@ describe('modules/sw-mail-template/page/sw-mail-template-detail', () => {
             wrapper.vm.mailTemplate,
             expect.anything(),
             '1a2b3c',
+            undefined,
+            '6666673yd1ssd299si1d837dy1ud628',
         );
     });
 
@@ -446,6 +453,8 @@ describe('modules/sw-mail-template/page/sw-mail-template-detail', () => {
             wrapper.vm.mailTemplate,
             expect.anything(),
             '1a2b3c',
+            undefined,
+            '6666673yd1ssd299si1d837dy1ud628',
         );
     });
 
@@ -567,6 +576,8 @@ describe('modules/sw-mail-template/page/sw-mail-template-detail', () => {
             mailTemplate,
             expect.anything(),
             '1a2b3c',
+            undefined,
+            '6666673yd1ssd299si1d837dy1ud628',
         );
     });
 
@@ -591,10 +602,10 @@ describe('modules/sw-mail-template/page/sw-mail-template-detail', () => {
         wrapper.vm.createNotificationError = jest.fn();
         const notificationMock = wrapper.vm.createNotificationError;
 
-        const previewSidebarButton = wrapper.find('.sw-mail-template-detail__show-preview-sidebar');
+        const previewSidebarButton = wrapper.findComponent('.sw-mail-template-detail__show-preview-sidebar');
 
         expect(previewSidebarButton.attributes().disabled).toBe('true');
-        await previewSidebarButton.trigger('click');
+        await previewSidebarButton.vm.$emit('click');
 
         await flushPromises();
 
@@ -628,10 +639,10 @@ describe('modules/sw-mail-template/page/sw-mail-template-detail', () => {
         wrapper.vm.createNotificationError = jest.fn();
         const notificationMock = wrapper.vm.createNotificationError;
 
-        const previewSidebarButton = wrapper.find('.sw-mail-template-detail__show-preview-sidebar');
+        const previewSidebarButton = wrapper.findComponent('.sw-mail-template-detail__show-preview-sidebar');
 
         expect(previewSidebarButton.attributes().disabled).toBe('true');
-        await previewSidebarButton.trigger('click');
+        await previewSidebarButton.vm.$emit('click');
 
         await flushPromises();
 
@@ -675,6 +686,8 @@ describe('modules/sw-mail-template/page/sw-mail-template-detail', () => {
             wrapper.vm.mailTemplate,
             expect.anything(),
             '1a2b3c',
+            undefined,
+            '6666673yd1ssd299si1d837dy1ud628',
         );
 
         expect(notificationMock).toHaveBeenCalledTimes(1);

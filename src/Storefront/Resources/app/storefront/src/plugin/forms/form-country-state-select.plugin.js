@@ -19,11 +19,19 @@ export default class CountryStateSelectPlugin extends Plugin {
         stateRequired: 'state-required',
         zipcodeRequired: 'zipcode-required',
         zipcodeLabel: '#zipcodeLabel',
+        scopeElementSelector: null,
+        prefix: null,
     };
 
     init() {
         this.initClient();
         this.initSelects();
+
+        this._getFormFieldToggleInstance();
+
+        if (this._formFieldToggleInstance) {
+            this._formFieldToggleInstance.$emitter.subscribe('onChange', this._onFormFieldToggleChange.bind(this));
+        }
     }
 
     initClient() {
@@ -31,9 +39,15 @@ export default class CountryStateSelectPlugin extends Plugin {
     }
 
     initSelects() {
+        this.scopeElement = this.el;
+
+        if (this.options.scopeElementSelector) {
+            this.scopeElement = DomAccess.querySelector(document, this.options.scopeElementSelector);
+        }
+
         const { countrySelectSelector, countryStateSelectSelector, initialCountryAttribute, initialCountryStateAttribute } = CountryStateSelectPlugin.options;
-        const countrySelect = DomAccess.querySelector(this.el, countrySelectSelector);
-        const countryStateSelect = DomAccess.querySelector(this.el, countryStateSelectSelector);
+        const countrySelect = DomAccess.querySelector(this.scopeElement, countrySelectSelector);
+        const countryStateSelect = DomAccess.querySelector(this.scopeElement, countryStateSelectSelector);
         const initialCountryId = DomAccess.getDataAttribute(countrySelect, initialCountryAttribute);
         const initialCountryStateId = DomAccess.getDataAttribute(countryStateSelect, initialCountryStateAttribute);
         const countrySelectCurrentOption = countrySelect.options[countrySelect.selectedIndex];
@@ -70,11 +84,11 @@ export default class CountryStateSelectPlugin extends Plugin {
         const vatIdRequired = DomAccess.getDataAttribute(countrySelect, this.options.vatIdRequired);
         const vatIdInput = document.querySelector(this.options.vatIdFieldInput);
 
-        const zipcodeLabel = DomAccess.querySelector(document, this.options.zipcodeLabel, false);
-        const zipcodeInput = DomAccess.querySelector(document, this.options.zipcodeFieldInput, false);
+        const zipcodeLabel = DomAccess.querySelector(this.scopeElement, this.options.zipcodeLabel, false);
+        const zipcodeInput = DomAccess.querySelector(this.scopeElement, this.options.zipcodeFieldInput, false);
         const zipcodeRequired = !!DomAccess.getDataAttribute(countrySelect, this.options.zipcodeRequired, false);
 
-        this._updateZipcodeRequired(zipcodeLabel, zipcodeInput, zipcodeRequired)
+        this._updateZipcodeRequired(zipcodeLabel, zipcodeInput, zipcodeRequired);
 
         if (vatIdInput) {
             this._updateRequiredVatId(vatIdInput, vatIdRequired);
@@ -91,25 +105,29 @@ export default class CountryStateSelectPlugin extends Plugin {
                 let responseData = JSON.parse(response);
                 responseData = {...responseData, ...{ stateRequired }};
 
-                updateStateSelect(responseData, countryStateId, this.el, CountryStateSelectPlugin.options)
+                updateStateSelect(responseData, countryStateId, this.el, CountryStateSelectPlugin.options);
             }
         );
     }
 
     _updateRequiredVatId(vatIdFieldInput, vatIdRequired) {
+        if (this._differentShippingCheckbox && this.options.prefix === 'billingAddress') {
+            return;
+        }
+
         const label = vatIdFieldInput.parentNode.querySelector('label');
 
         if (vatIdRequired) {
             vatIdFieldInput.setAttribute('required', 'required');
 
-            if (label.textContent.substr(-1, 1) !== '*') {
+            if (label?.textContent && label.textContent.substr(-1, 1) !== '*') {
                 label.textContent = `${label.textContent}*`;
             }
 
             return;
         }
 
-        if (label.textContent.substr(-1, 1) === '*') {
+        if (label?.textContent && label.textContent.substr(-1, 1) === '*') {
             label.textContent = label.textContent.substr(0, label.textContent.length -1);
         }
 
@@ -129,6 +147,33 @@ export default class CountryStateSelectPlugin extends Plugin {
         }
 
         input.removeAttribute('required');
+    }
+
+    _getFormFieldToggleInstance() {
+        const toggleField = DomAccess.querySelector(document, '[data-form-field-toggle-target=".js-form-field-toggle-shipping-address"]', false);
+        if (!toggleField) {
+            return;
+        }
+
+        this._formFieldToggleInstance = window.PluginManager.getPluginInstanceFromElement(toggleField, 'FormFieldToggle');
+    }
+    _onFormFieldToggleChange(event) {
+        this._differentShippingCheckbox = event.target.checked;
+
+        const scopeElementSelector = this._differentShippingCheckbox ? '.register-shipping' : '.register-billing';
+        const scopeElement = DomAccess.querySelector(document, scopeElementSelector);
+
+        const countrySelect = DomAccess.querySelector(scopeElement, this.options.countrySelectSelector);
+        const countrySelectCurrentOption = countrySelect.options[countrySelect.selectedIndex];
+
+        const vatIdRequired = !!DomAccess.getDataAttribute(countrySelectCurrentOption, this.options.vatIdRequired, false);
+        const vatIdInput = document.querySelector(this.options.vatIdFieldInput);
+
+        if (!vatIdInput) {
+            return;
+        }
+
+        this._updateRequiredVatId(vatIdInput, vatIdRequired);
     }
 }
 
@@ -181,14 +226,14 @@ function updateRequiredState(countryStateSelect, stateRequired, placeholderQuery
         placeholder.setAttribute('disabled', 'disabled');
         countryStateSelect.setAttribute('required', 'required');
 
-        if (label.textContent && label.textContent.substr(-1, 1) !== '*') {
+        if (label?.textContent && label.textContent.substr(-1, 1) !== '*') {
             label.textContent = `${label.textContent.trim()}*`;
         }
 
         return;
     }
 
-    if (label.textContent && label.textContent.substr(-1, 1) === '*') {
+    if (label?.textContent && label.textContent.substr(-1, 1) === '*') {
         label.textContent = label.textContent.substr(0, label.textContent.length -1);
     }
 

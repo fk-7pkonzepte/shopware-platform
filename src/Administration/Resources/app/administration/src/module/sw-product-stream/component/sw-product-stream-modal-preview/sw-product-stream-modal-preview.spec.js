@@ -1,5 +1,5 @@
-/*
- * @package inventory
+/**
+ * @package services-settings
  */
 
 import { mount } from '@vue/test-utils';
@@ -95,6 +95,13 @@ async function createWrapper() {
                 'sw-container': true,
                 'sw-entity-single-select': true,
                 'sw-empty-state': true,
+                'sw-product-variant-info': true,
+                'router-link': true,
+                'sw-data-grid-column-boolean': true,
+                'sw-color-badge': true,
+                'sw-pagination': true,
+                'sw-data-grid': true,
+                'sw-button': true,
             },
             provide: {
                 productStreamPreviewService: {},
@@ -171,5 +178,41 @@ describe('src/module/sw-product-stream/component/sw-product-stream-modal-preview
 
         expect(wrapper.vm.currencyFilter).toEqual(expect.any(Function));
         expect(wrapper.vm.stockColorVariantFilter).toEqual(expect.any(Function));
+    });
+
+    it('should load sales channel successfully', async () => {
+        const wrapper = await createWrapper();
+        const salesChannelData = {
+            id: '1',
+            name: 'Sales Channel 1',
+            currency: {
+                id: '1',
+                isoCode: 'PLN',
+            },
+            currencyId: '2',
+        };
+        wrapper.vm.selectedSalesChannel = '1';
+
+        jest.spyOn(wrapper.vm.salesChannelRepository, 'get').mockImplementation(() => {
+            return Promise.resolve(salesChannelData);
+        });
+
+        await wrapper.vm.loadSalesChannelById();
+
+        expect(wrapper.vm.salesChannelRepository.get).toHaveBeenCalledTimes(1);
+        expect(wrapper.vm.selectedCurrencyIsoCode).toEqual(salesChannelData.currency.isoCode);
+        expect(wrapper.vm.selectedCurrencyId).toEqual(salesChannelData.currencyId);
+    });
+
+    it('should not load sales channel', async () => {
+        const wrapper = await createWrapper();
+
+        jest.spyOn(wrapper.vm.salesChannelRepository, 'get').mockImplementation(() => {
+            return Promise.resolve({});
+        });
+
+        await wrapper.vm.loadSalesChannelById();
+
+        expect(wrapper.vm.salesChannelRepository.get).toHaveBeenCalledTimes(0);
     });
 });
