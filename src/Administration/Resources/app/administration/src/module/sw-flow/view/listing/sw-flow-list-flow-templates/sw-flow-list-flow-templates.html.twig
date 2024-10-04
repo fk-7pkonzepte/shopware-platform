@@ -51,10 +51,11 @@
             </sw-entity-listing>
 
             <sw-empty-state
-                v-else
+                v-if="!isLoading && !total"
                 class="sw-flow-list-my_templates__empty-state"
-                :title="$tc('sw-flow.list.emptyStateTitle')"
+                :title="$tc('sw-flow.list.emptyTemplatesTitle')"
                 :subline="$tc('sw-flow.list.emptyStateSubTitle')"
+                :absolute="false"
             >
                 <template #icon>
                     <img

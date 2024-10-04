@@ -22,6 +22,7 @@
       "confirmText": "Are you sure you want to delete this flow?",
       "emptyStateTitle": "No flows yet",
       "emptyStateSubTitle": "Add flows by clicking the \"Add flow\" button.",
+      "emptyTemplatesTitle": "No flow templates available",
       "unknownTrigger": "Unknown trigger"
     },
     "template": {

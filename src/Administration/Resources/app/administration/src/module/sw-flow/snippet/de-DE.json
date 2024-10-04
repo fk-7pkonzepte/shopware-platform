@@ -22,6 +22,7 @@
       "confirmText": "Bist Du sicher, dass Du diesen Flow löschen möchtest?",
       "emptyStateTitle": "Noch keine Flows erstellt",
       "emptyStateSubTitle": "Füge Flows über den \"Hinzufügen\"-Button hinzu.",
+      "emptyTemplatesTitle": "Keine Flow Templates vorhanden",
       "unknownTrigger": "Unbekannter Auslöser"
     },
     "template": {
