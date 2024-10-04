@@ -111,7 +111,11 @@ export default {
             };
         },
 
-        ...mapPropertyErrors('manufacturer', ['name']),
+        ...mapPropertyErrors('manufacturer', [
+            'description',
+            'link',
+            'name',
+        ]),
     },
 
     watch: {

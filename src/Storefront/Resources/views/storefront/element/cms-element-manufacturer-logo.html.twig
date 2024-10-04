@@ -6,7 +6,7 @@
             'media': element.data.manufacturer.media,
             'name': element.data.manufacturer.translated.name,
             'alt': element.data.manufacturer.translated.name,
-            'link': config.url.value ? config.url.value : element.data.manufacturer.link,
+            'link': config.url.value ? config.url.value : element.data.manufacturer.translated.link,
         } %}
     {% else %}
         {% set manufacturer = {
@@ -25,7 +25,7 @@
 
             {% block element_manufacturer_logo_link %}
                 {% if manufacturer.name %}
-                    <a href="{{ manufacturer.link }}"
+                    <a href="{{ manufacturer.translated.link }}"
                        class="cms-image-link product-detail-manufacturer-link"
                        {% if config.newTab.value %}target="_blank" rel="noreferrer noopener"{% endif %}
                        title="{{ manufacturer.name }}">

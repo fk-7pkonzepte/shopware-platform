@@ -33,6 +33,11 @@ class ProductManufacturerTranslationEntity extends TranslationEntity
     protected $description;
 
     /**
+     * @var string|null
+     */
+    protected $link;
+
+    /**
      * @var ProductManufacturerEntity|null
      */
     protected $productManufacturer;
@@ -65,6 +70,16 @@ class ProductManufacturerTranslationEntity extends TranslationEntity
     public function setDescription(?string $description): void
     {
         $this->description = $description;
+    }
+
+    public function getLink(): ?string
+    {
+        return $this->link;
+    }
+
+    public function setLink(?string $link): void
+    {
+        $this->link = $link;
     }
 
     public function getProductManufacturer(): ?ProductManufacturerEntity

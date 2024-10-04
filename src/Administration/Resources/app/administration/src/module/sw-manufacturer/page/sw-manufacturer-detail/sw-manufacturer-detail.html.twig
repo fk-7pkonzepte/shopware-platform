@@ -105,8 +105,9 @@
                             <sw-text-field
                                 v-model:value="manufacturer.link"
                                 :label="$tc('sw-manufacturer.detail.labelLink')"
-                                :placeholder="$tc('sw-manufacturer.detail.placeholderLink')"
+                                :placeholder="placeholder(manufacturer, 'link', $tc('sw-manufacturer.detail.placeholderLink'))"
                                 name="link"
+                                :error="manufacturerLinkError"
                                 :disabled="!acl.can('product_manufacturer.editor') || undefined"
                             />
                             {% endblock %}
@@ -145,6 +146,7 @@
                         name="description"
                         sanitize-input
                         sanitize-field-name="product_manufacturer_translation.description"
+                        :error="manufacturerDescriptionError"
                         :disabled="!acl.can('product_manufacturer.editor') || undefined"
                     />
                     {% endblock %}

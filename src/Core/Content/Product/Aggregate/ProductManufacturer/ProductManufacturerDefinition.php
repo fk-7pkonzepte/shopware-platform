@@ -59,7 +59,7 @@ class ProductManufacturerDefinition extends EntityDefinition
             (new IdField('id', 'id'))->addFlags(new ApiAware(), new PrimaryKey(), new Required()),
             (new VersionField())->addFlags(new ApiAware()),
             (new FkField('media_id', 'mediaId', MediaDefinition::class))->addFlags(new ApiAware()),
-            (new StringField('link', 'link'))->addFlags(new ApiAware()),
+            (new TranslatedField('link'))->addFlags(new ApiAware()),
             (new TranslatedField('name'))->addFlags(new ApiAware(), new SearchRanking(SearchRanking::HIGH_SEARCH_RANKING)),
             (new TranslatedField('description'))->addFlags(new ApiAware()),
             (new TranslatedField('customFields'))->addFlags(new ApiAware()),
