@@ -46,6 +46,8 @@ final class DeliveryNoteRenderer extends AbstractDocumentRenderer
 
     public function render(array $operations, Context $context, DocumentRendererConfig $rendererConfig): RendererResult
     {
+        $context = clone $context;
+
         $result = new RendererResult();
 
         $template = '@Framework/documents/delivery_note.html.twig';

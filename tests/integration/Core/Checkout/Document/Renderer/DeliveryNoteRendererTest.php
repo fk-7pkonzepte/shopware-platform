@@ -144,4 +144,34 @@ class DeliveryNoteRendererTest extends TestCase
 
         static::assertEquals($operationDelivery->getOrderVersionId(), Defaults::LIVE_VERSION);
     }
+
+    public function testContextLanguageIdChainIsNotModified(): void
+    {
+        $cart = $this->generateDemoCart(1);
+        $orderId = $this->persistCart($cart);
+
+        $operationDelivery = new DocumentGenerateOperation($orderId);
+
+        $expectedLanguageIdChain = [
+            Uuid::randomHex(),
+        ];
+
+        $testContext = (clone $this->context)->assign([
+            'languageIdChain' => $expectedLanguageIdChain,
+        ]);
+
+        static::assertEquals($expectedLanguageIdChain, $testContext->getLanguageIdChain());
+
+        $this->deliveryNoteRenderer->render(
+            [$orderId => $operationDelivery],
+            $testContext,
+            new DocumentRendererConfig()
+        );
+
+        static::assertEquals(
+            $expectedLanguageIdChain,
+            $testContext->getLanguageIdChain(),
+            'LanguageIdChain of context changed'
+        );
+    }
 }

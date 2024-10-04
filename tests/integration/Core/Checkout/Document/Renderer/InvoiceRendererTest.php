@@ -3,6 +3,7 @@
 namespace Shopware\Tests\Integration\Core\Checkout\Document\Renderer;
 
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Large;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Shopware\Core\Checkout\Cart\Cart;
@@ -81,7 +82,7 @@ class InvoiceRendererTest extends TestCase
         $this->productRepository = $this->getContainer()->get('product.repository');
         $this->invoiceRenderer = $this->getContainer()->get(InvoiceRenderer::class);
         $this->cartService = $this->getContainer()->get(CartService::class);
-        self::$deLanguageId = $this->getDeDeLanguageId();
+        self::$deLanguageId = $this->getDeDeLanguageId('en');
     }
 
     protected function tearDown(): void
@@ -561,6 +562,39 @@ class InvoiceRendererTest extends TestCase
 
         static::assertNotEquals($operationInvoice->getOrderVersionId(), Defaults::LIVE_VERSION);
         static::assertTrue($this->orderVersionExists($orderId, $operationInvoice->getOrderVersionId()));
+    }
+
+    public function testContextLanguageIdChainIsNotModified(): void
+    {
+        $cart = $this->generateDemoCart([1]);
+        $orderId = $this->persistCart($cart);
+
+        $operationInvoice = new DocumentGenerateOperation($orderId);
+
+        static::assertEquals($operationInvoice->getOrderVersionId(), Defaults::LIVE_VERSION);
+        static::assertTrue($this->orderVersionExists($orderId, $operationInvoice->getOrderVersionId()));
+
+        $expectedLanguageIdChain = [
+            Uuid::randomHex(),
+        ];
+
+        $testContext = (clone $this->context)->assign([
+            'languageIdChain' => $expectedLanguageIdChain,
+        ]);
+
+        static::assertEquals($expectedLanguageIdChain, $testContext->getLanguageIdChain());
+
+        $this->invoiceRenderer->render(
+            [$orderId => $operationInvoice],
+            $testContext,
+            new DocumentRendererConfig()
+        );
+
+        static::assertEquals(
+            $expectedLanguageIdChain,
+            $testContext->getLanguageIdChain(),
+            'LanguageIdChain of context changed'
+        );
     }
 
     /**

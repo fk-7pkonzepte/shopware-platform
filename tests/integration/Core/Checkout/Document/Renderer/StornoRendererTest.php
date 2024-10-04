@@ -184,6 +184,36 @@ class StornoRendererTest extends TestCase
         );
     }
 
+    public function testContextLanguageIdChainIsNotModified(): void
+    {
+        $cart = $this->generateDemoCart([7, 13]);
+        $orderId = $this->cartService->order($cart, $this->salesChannelContext, new RequestDataBag());
+
+        $operation = new DocumentGenerateOperation($orderId);
+
+        $expectedLanguageIdChain = [
+            Uuid::randomHex(),
+        ];
+
+        $testContext = (clone $this->context)->assign([
+            'languageIdChain' => $expectedLanguageIdChain,
+        ]);
+
+        static::assertEquals($expectedLanguageIdChain, $testContext->getLanguageIdChain());
+
+        $this->stornoRenderer->render(
+            [$orderId => $operation],
+            $testContext,
+            new DocumentRendererConfig()
+        );
+
+        static::assertEquals(
+            $expectedLanguageIdChain,
+            $testContext->getLanguageIdChain(),
+            'LanguageIdChain of context changed'
+        );
+    }
+
     public static function stornoNoteRendererDataProvider(): \Generator
     {
         yield 'render storno successfully' => [

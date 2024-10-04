@@ -87,6 +87,38 @@ class CreditNoteRendererTest extends TestCase
         $this->documentGenerator = $this->getContainer()->get(DocumentGenerator::class);
     }
 
+    public function testContextLanguageIdChainIsNotModified(): void
+    {
+        $cart = $this->generateDemoCart([7, 13]);
+        $cart = $this->generateCreditItems($cart, [100, 200]);
+        $orderId = $this->cartService->order($cart, $this->salesChannelContext, new RequestDataBag());
+
+        $operation = new DocumentGenerateOperation($orderId);
+
+
+        $expectedLanguageIdChain = [
+            Uuid::randomHex(),
+        ];
+
+        $testContext = (clone $this->context)->assign([
+            'languageIdChain' => $expectedLanguageIdChain,
+        ]);
+
+        static::assertEquals($expectedLanguageIdChain, $testContext->getLanguageIdChain());
+
+        $this->creditNoteRenderer->render(
+            [$orderId => $operation],
+            $testContext,
+            new DocumentRendererConfig()
+        );
+
+        static::assertEquals(
+            $expectedLanguageIdChain,
+            $testContext->getLanguageIdChain(),
+            'LanguageIdChain of context changed'
+        );
+    }
+
     /**
      * @param array<int, int> $possibleTaxes
      * @param array<int, int> $creditPrices

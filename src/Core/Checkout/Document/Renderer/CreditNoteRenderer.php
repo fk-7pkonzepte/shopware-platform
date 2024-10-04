@@ -52,6 +52,8 @@ final class CreditNoteRenderer extends AbstractDocumentRenderer
 
     public function render(array $operations, Context $context, DocumentRendererConfig $rendererConfig): RendererResult
     {
+        $context = clone $context;
+
         $result = new RendererResult();
 
         $template = '@Framework/documents/credit_note.html.twig';
