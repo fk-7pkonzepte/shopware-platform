@@ -34,6 +34,11 @@ class CriteriaTest extends TestCase
             '{"total-count-mode":0}',
         ];
 
+        yield 'test empty with empty ids array' => [
+            new Criteria([]),
+            '{"total-count-mode":0}',
+        ];
+
         yield 'test page / limit' => [
             (new Criteria())->setLimit(10)->setOffset(10),
             '{"total-count-mode":0,"limit":10,"page":2}',
@@ -124,7 +129,6 @@ class CriteriaTest extends TestCase
         yield 'non string list' => [[123, 456]];
         yield 'non string key values' => [[[['foo'], ['bar']]]];
         yield 'non string values' => [[[['pk-1' => 123], ['pk-2' => 456]]]];
-        yield 'empty list' => [[]];
     }
 
     /**

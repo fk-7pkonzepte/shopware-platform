@@ -124,11 +124,11 @@ class Criteria extends Struct implements \Stringable
     protected array $fields = [];
 
     /**
-     * @param array<string>|array<array<string, string>>|null $ids
+     * @param array<string>|array<array<string, string>>|null $ids Empty array is treated like null.
      */
     public function __construct(?array $ids = null, protected int $nestingLevel = 0)
     {
-        if ($ids === null) {
+        if ($ids === null || $ids === []) {
             return;
         }
 
