@@ -1,6 +1,7 @@
 <!-- eslint-disable-next-line sw-deprecation-rules/no-twigjs-blocks -->
 {% block sw_string_filter %}
 <sw-base-filter
+    class="sw-string-filter"
     :title="filter.label"
     :show-reset-button="!!filter.value"
     :active="active"
@@ -9,10 +10,38 @@
     <!-- eslint-disable-next-line sw-deprecation-rules/no-twigjs-blocks -->
     {% block sw_string_filter_content %}
     <mt-text-field
+        class="sw-string-filter__field"
         :model-value="filter.value"
         :placeholder="filter.placeholder"
+        :title="$tc('sw-string-filter.filterType.' + (this.criteriaFilterTypeEditable ? this.filterType : this.criteriaFilterType) + '.title')"
         @change="updateFilter"
-    />
+    >
+
+        <template
+            v-if="criteriaFilterTypeEditable"
+            #suffix
+        >
+            <sw-select-field
+                v-model:value="filterType"
+                @update:value="onFilterTypeChanged"
+            >
+                <option
+                    :value="method" v-for="method in filterTypeOptions"
+                    :title="$tc('sw-string-filter.filterType.' + method + '.title')"
+                >
+                    {{ $tc('sw-string-filter.filterType.' + method + '.label') }}
+                </option>
+            </sw-select-field>
+        </template>
+
+        <template
+            v-if="criteriaFilterTypeEditable"
+            #hint
+        >
+            <span>{{ $tc('sw-string-filter.filterType.' + filterType + '.title') }}</span>
+        </template>
+
+    </mt-text-field>
     {% endblock %}
 </sw-base-filter>
 {% endblock %}

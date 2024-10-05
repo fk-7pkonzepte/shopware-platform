@@ -97,6 +97,7 @@
             :filter="filter"
             :active="!!activeFilters[filter.name]"
             :criteria-filter-type="filter.criteriaFilterType"
+            :criteria-filter-type-editable="filter.criteriaFilterTypeEditable ?? false"
             @filter-update="updateFilter"
             @filter-reset="resetFilter"
         />

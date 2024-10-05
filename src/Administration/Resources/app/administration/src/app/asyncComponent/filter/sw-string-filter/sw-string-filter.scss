@@ -1,0 +1,23 @@
+.sw-string-filter {
+    &__field {
+
+        .mt-field__label {
+            display: none;
+        }
+
+        .mt-field__addition {
+            padding: 0;
+
+            > .sw-block-field {
+                margin-bottom: 0;
+                background: #f9fafb;
+
+                .mt-block-field__block {
+                    background: #f9fafb;
+                    border: none;
+                    border-radius: 0;
+                }
+            }
+        }
+    }
+}

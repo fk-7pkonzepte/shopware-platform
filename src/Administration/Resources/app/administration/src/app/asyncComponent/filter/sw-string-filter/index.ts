@@ -1,7 +1,18 @@
 import type { PropType } from 'vue';
 import template from './sw-string-filter.html.twig';
+import './sw-string-filter.scss';
 
 const { Criteria } = Shopware.Data;
+
+export type PropCriteriaFilterType = PropType<'contains' | 'equals' | 'equalsAny' | 'prefix' | 'suffix'>;
+
+export const criteriaFilterTypes = [
+    'contains',
+    'equals',
+    'equalsAny',
+    'prefix',
+    'suffix',
+];
 
 /**
  * @private
@@ -21,20 +32,26 @@ export default Shopware.Component.wrapComponentConfig({
             required: true,
         },
         criteriaFilterType: {
-            type: String as PropType<'contains' | 'equals'>,
+            type: String as PropCriteriaFilterType,
             required: false,
             default: 'contains',
-            validValues: [
-                'contains',
-                'equals',
-            ],
+            validValues: criteriaFilterTypes,
             validator(value: string): boolean {
-                return [
-                    'contains',
-                    'equals',
-                ].includes(value);
+                return criteriaFilterTypes.includes(value);
             },
         },
+        criteriaFilterTypeEditable: {
+            type: Boolean,
+            required: false,
+            default: false,
+        },
+    },
+
+    data() {
+        return {
+            filterType: this.criteriaFilterType,
+            filterTypeOptions: criteriaFilterTypes,
+        };
     },
 
     methods: {
@@ -45,11 +62,24 @@ export default Shopware.Component.wrapComponentConfig({
                 return;
             }
 
+            let filterType = this.criteriaFilterTypeEditable ? this.filterType : this.criteriaFilterType;
+
+            let filterValue : string|string[] = newValue;
+
+            if(filterType === 'equalsAny') {
+                filterValue = filterValue.split(' ').map(e => e.trim());
+            }
+
             const filterCriteria = [
-                Criteria[this.criteriaFilterType](this.filter.property, newValue),
+                Criteria[filterType](this.filter.property, filterValue),
             ];
 
             this.$emit('filter-update', this.filter.name, filterCriteria, newValue);
+        },
+
+        onFilterTypeChanged(newFilterType: string) {
+            this.filterType = newFilterType;
+            this.updateFilter(this.filter.value);
         },
 
         resetFilter(): void {

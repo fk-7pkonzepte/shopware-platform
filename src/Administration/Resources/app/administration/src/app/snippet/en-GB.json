@@ -1549,6 +1549,30 @@
     "noCriteria": "No {criteriaName}",
     "hasCriteria": "Has {criteriaName}"
   },
+  "sw-string-filter": {
+    "filterType": {
+      "contains": {
+        "label": "contains",
+        "title": "Vague search (contains)"
+      },
+      "equals": {
+        "label": "equals",
+        "title": "Exact search (equals)"
+      },
+      "equalsAny": {
+        "label": "equals any",
+        "title": "Exact search for all tokens (equalsAny, space separated)"
+      },
+      "prefix": {
+        "label": "prefix",
+        "title": "Search by prefix"
+      },
+      "suffix": {
+        "label": "suffix",
+        "title": "Search by suffix"
+      }
+    }
+  },
   "sw-filter-panel": {
     "titleSidebarItemFilter": "Filters"
   },

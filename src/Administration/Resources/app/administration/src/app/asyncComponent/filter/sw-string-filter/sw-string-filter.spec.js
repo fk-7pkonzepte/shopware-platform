@@ -25,7 +25,8 @@ async function createWrapper() {
 }
 
 describe('components/sw-string-filter', () => {
-    it('should emit `filter-update` event with custom criteria filter', async () => {
+
+    it('should emit `filter-update` event with custom criteria filter (equals)', async () => {
         const wrapper = await createWrapper();
         await wrapper.setProps({ criteriaFilterType: 'equals' });
 
@@ -37,6 +38,70 @@ describe('components/sw-string-filter', () => {
         expect(wrapper.emitted()['filter-update'][0]).toEqual([
             'promotionCode',
             [Criteria.equals('code', 'cheap')],
+            'cheap',
+        ]);
+    });
+
+    it('should emit `filter-update` event with custom criteria filter (equalsAny)', async () => {
+        const wrapper = await createWrapper();
+        await wrapper.setProps({ criteriaFilterType: 'equalsAny' });
+
+        const input = wrapper.find('input');
+
+        await input.setValue('cheap test');
+        await input.trigger('change');
+
+        expect(wrapper.emitted()['filter-update'][0]).toEqual([
+            'promotionCode',
+            [Criteria.equalsAny('code', ['cheap', 'test'])],
+            'cheap test',
+        ]);
+    });
+
+    it('should emit `filter-update` event with custom criteria filter (contains)', async () => {
+        const wrapper = await createWrapper();
+        await wrapper.setProps({ criteriaFilterType: 'contains' });
+
+        const input = wrapper.find('input');
+
+        await input.setValue('cheap');
+        await input.trigger('change');
+
+        expect(wrapper.emitted()['filter-update'][0]).toEqual([
+            'promotionCode',
+            [Criteria.contains('code', 'cheap')],
+            'cheap',
+        ]);
+    });
+
+    it('should emit `filter-update` event with custom criteria filter (prefix)', async () => {
+        const wrapper = await createWrapper();
+        await wrapper.setProps({ criteriaFilterType: 'prefix' });
+
+        const input = wrapper.find('input');
+
+        await input.setValue('cheap');
+        await input.trigger('change');
+
+        expect(wrapper.emitted()['filter-update'][0]).toEqual([
+            'promotionCode',
+            [Criteria.prefix('code', 'cheap')],
+            'cheap',
+        ]);
+    });
+
+    it('should emit `filter-update` event with custom criteria filter (suffix)', async () => {
+        const wrapper = await createWrapper();
+        await wrapper.setProps({ criteriaFilterType: 'suffix' });
+
+        const input = wrapper.find('input');
+
+        await input.setValue('cheap');
+        await input.trigger('change');
+
+        expect(wrapper.emitted()['filter-update'][0]).toEqual([
+            'promotionCode',
+            [Criteria.suffix('code', 'cheap')],
             'cheap',
         ]);
     });
