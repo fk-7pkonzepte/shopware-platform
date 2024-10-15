@@ -106,6 +106,9 @@ export default {
 
             criteria.addAssociation('addresses');
             criteria.addAssociation('billingAddress');
+            // eslint-disable-next-line no-warning-comments
+            // TODO currently not working, country is not added
+            // criteria.addAssociation('billingAddress.country');
             criteria.addAssociation('salesChannel');
             criteria.addAssociation('orderCustomer');
             criteria.addAssociation('currency');
@@ -122,6 +125,9 @@ export default {
                 .getAssociation('deliveries')
                 .addAssociation('stateMachineState')
                 .addAssociation('shippingOrderAddress')
+                // eslint-disable-next-line no-warning-comments
+                // TODO currently not working, country association is not loaded
+                // .addAssociation('shippingOrderAddress.country')
                 .addAssociation('shippingMethod')
                 .addSorting(Criteria.sort('shippingCosts.unitPrice', 'DESC'));
 
@@ -421,12 +427,30 @@ export default {
                     allowResize: true,
                     visible: false,
                 },
+                // eslint-disable-next-line no-warning-comments
+                // TODO currently not working, country association is not loaded
+                // {
+                //     property: 'billingAddress.country.name',
+                //     label: 'sw-order.list.columnBillingAddressCountry',
+                //     allowResize: true,
+                //     visible: false,
+                //     useCustomSort: true,
+                // },
                 {
                     property: 'deliveries.id',
                     dataIndex: 'deliveries.shippingOrderAddress.street',
                     label: 'sw-order.list.columnDeliveryAddress',
                     allowResize: true,
                 },
+                // eslint-disable-next-line no-warning-comments
+                // TODO currently not working, country association is not loaded
+                // {
+                //     property: 'deliveries.shippingOrderAddress.country.name',
+                //     label: 'sw-order.list.columnDeliveryAddressCountry',
+                //     allowResize: true,
+                //     visible: false,
+                //     useCustomSort: true,
+                // },
                 {
                     property: 'amountTotal',
                     label: 'sw-order.list.columnAmount',

@@ -72,6 +72,8 @@
       "columnCampaignCode": "Kampagnen-Code",
       "columnBoundSalesChannel": "Verkaufskanal",
       "columnActive": "Aktiv",
+      "columnBillingAddressCountry": "Rechnungsland",
+      "columnShippingAddressCountry": "Lieferland",
       "emptyBoundSalesChannel": "Alle",
       "contextMenuView": "Anzeigen",
       "contextMenuDuplicate": "Duplizieren",

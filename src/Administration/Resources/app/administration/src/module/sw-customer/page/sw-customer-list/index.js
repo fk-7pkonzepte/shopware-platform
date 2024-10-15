@@ -86,7 +86,8 @@ export default {
             });
 
             defaultCriteria
-                .addAssociation('defaultBillingAddress')
+                .addAssociation('defaultBillingAddress.country')
+                .addAssociation('defaultShippingAddress.country')
                 .addAssociation('group')
                 .addAssociation('requestedGroup')
                 .addAssociation('boundSalesChannel');
@@ -301,7 +302,7 @@ export default {
         },
 
         getCustomerColumns() {
-            const columns = [
+            return [
                 {
                     property: 'firstName',
                     dataIndex: 'lastName,firstName',
@@ -397,9 +398,21 @@ export default {
                     visible: false,
                     useCustomSort: true,
                 },
+                {
+                    property: 'defaultBillingAddress.country.name',
+                    label: 'sw-customer.list.columnBillingAddressCountry',
+                    allowResize: true,
+                    visible: false,
+                    useCustomSort: true,
+                },
+                {
+                    property: 'defaultShippingAddress.country.name',
+                    label: 'sw-customer.list.columnShippingAddressCountry',
+                    allowResize: true,
+                    visible: false,
+                    useCustomSort: true,
+                },
             ];
-
-            return columns;
         },
 
         loadFilterValues() {

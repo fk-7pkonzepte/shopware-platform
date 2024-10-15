@@ -72,6 +72,8 @@
       "columnCampaignCode": "Campaign code",
       "columnBoundSalesChannel": "Sales Channel",
       "columnActive": "Active",
+      "columnBillingAddressCountry": "Billing country",
+      "columnShippingAddressCountry": "Shipping country",
       "emptyBoundSalesChannel": "All",
       "contextMenuView": "View",
       "contextMenuDelete": "Delete",
